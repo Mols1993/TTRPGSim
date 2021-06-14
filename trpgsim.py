@@ -77,7 +77,7 @@ def parseCharacter(name):
     while x:
         character.actions.append(x)
         x = f.readline().strip(" \n")
-    characterList[name] = character
+    characterList[character.name] = character
 
 actionFiles = os.listdir(path="actions")
 actionList = {}
