@@ -28,7 +28,7 @@ def parseAction(name):
     action = Action()
     type = int(f.readline().strip(" \n"))
     action.type = type
-    action.name = name
+    action.name = f.readline().strip(" \n")
     if(type == 1): #Attack
         action.score = f.readline().strip(" \n")
         action.attackBonus = int(f.readline().strip(" \n"))
@@ -75,15 +75,24 @@ def parseCharacter(name):
     character.actions = []
     x = f.readline().strip(" \n")
     while x:
-        character.actions.append(x)
+        character.actions.append(actionList[x])
         x = f.readline().strip(" \n")
     characterList[character.name] = character
 
 actionFiles = os.listdir(path="actions")
 actionList = {}
 
+#Parse all actions
 for i in actionFiles:
     parseAction(i)
+
+#Make hybrid actions actually reference the component action objects, we have to do that now since they weren't initialized before
+for i in actionList:
+    if(actionList[i].type == 3):
+        aux = actionList[i].hybrids
+        actionList[i].hybrids = []
+        for j in aux:
+            actionList[i].hybrids.append(actionList[j])
 
 print(actionList)
 print("---------------------------------------------------------------------")
@@ -95,6 +104,7 @@ for i in characterFiles:
     parseCharacter(i)
 
 print(characterList)
+print("---------------------------------------------------------------------")
 
 mainWindow = tk.Tk()
 mainWindow.title("Tabletop Battle Sim")
