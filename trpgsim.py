@@ -128,56 +128,43 @@ charFrame.grid(column=0, row=0)
 charFrame.grid_propagate(0)
 
 charFilterFrame = tk.Frame(charFrame, bg="#B6B6B6", height = 150, width=300)
-charFilterFrame.grid(column=0, row=0)
-charFilterFrame.grid_propagate(0)
+charFilterFrame.grid(column=0, row=0, sticky="EW")
+#charFilterFrame.grid_propagate(0)
 
-charFilterButtonPC = tk.Button(charFilterFrame, text="PCs", font = ("Arial", 19), width=19, height=1)
-charFilterButtonPC.grid(column=0, row=0)
+charFilterFrame.columnconfigure(0, weight=1)
 
-charFilterButtonNPC = tk.Button(charFilterFrame, text="NPCs",font = ("Arial", 19), width=19, height=1)
-charFilterButtonNPC.grid(column=0, row=1)
+charFilterButtonPC = tk.Button(charFilterFrame, text="PCs", font = ("Arial", 19))
+charFilterButtonPC.grid(column=0, row=0, sticky="EW")
 
-charFilterButtonBoss = tk.Button(charFilterFrame, text="Bosses",font = ("Arial", 19), width=19, height=1)
-charFilterButtonBoss.grid(column=0, row=2)
+charFilterButtonNPC = tk.Button(charFilterFrame, text="NPCs",font = ("Arial", 19))
+charFilterButtonNPC.grid(column=0, row=1, sticky="EW")
+
+charFilterButtonBoss = tk.Button(charFilterFrame, text="Bosses",font = ("Arial", 19))
+charFilterButtonBoss.grid(column=0, row=2, sticky="EW")
 
 
 charListFrame = tk.Frame(charFrame, bg="#C40000", height = 760, width=300)
 charListFrame.grid(column=0, row=1)
 charListFrame.grid_propagate(0)
 
-charListScrollbar = tk.Scrollbar(charListFrame)
+charListScrollbar = tk.Scrollbar(charListFrame, orient="vertical")
 charListScrollbar.grid(column=1, row=0, sticky = "NS")
 
-charListCanvas = tk.Canvas(charListFrame, bg="#00C400", height = 760, width=279, scrollregion = (0,0,279,1000), yscrollcommand = charListScrollbar.set)
+charListCanvas = tk.Canvas(charListFrame, bg="#00C400", height = 760, width=279, scrollregion = (0,0,279,1000))
 charListCanvas.grid(column=0, row=0, sticky="EW")
 charListCanvas.grid_propagate(0)
 
-charListScrollbar.config(command = charListCanvas.yview)
+charListCanvas.configure(yscrollcommand = charListScrollbar.set)
+charListScrollbar.configure(command = charListCanvas.yview)
 
-newFrame = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
+newFrame = tk.Frame(charListCanvas, bg="#0000C4", height=1000, width=279)
 newFrame.grid(column=0, row=0)
-newFrame2 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
-newFrame2.grid(column=0, row=1)
-newFrame3 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
-newFrame3.grid(column=0, row=2)
-newFrame4 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
-newFrame4.grid(column=0, row=3)
-newFrame5 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
-newFrame5.grid(column=0, row=4)
-newFrame6 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
-newFrame6.grid(column=0, row=5)
-newFrame7 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
-newFrame7.grid(column=0, row=6)
-newFrame8 = tk.Frame(charListCanvas, bg="#C400C4", height=100, width=279)
-newFrame8.grid(column=0, row=7)
-newFrame9 = tk.Frame(charListCanvas, bg="#C4C4C4", height=100, width=279)
-newFrame9.grid(column=0, row=8)
 
-
-charListCanvas.config(scrollregion = charListCanvas.bbox("all"))
-
-
-
+charListCanvas.create_window((0,0), window=newFrame, anchor="nw")
+newFrame2 = tk.Frame(newFrame, bg="#0000C4", height=100, width=400)
+newFrame2.grid(column=0, row=0)
+#newFrame3 = tk.Frame(newFrame, bg="#00C4C4", height=100, width=279)
+#newFrame3.grid(column=0, row=1)
 
 
 #SECTION B
