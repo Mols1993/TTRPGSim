@@ -32,16 +32,25 @@ def parseAction(name):
     if(type == 1): #Attack
         action.score = f.readline().strip(" \n")
         action.attackBonus = int(f.readline().strip(" \n"))
-        action.damageDice = f.readline().strip(" \n")
+        damageDice = f.readline().strip(" \n").split(", ")
+        action.damageDice = []
+        for i in damageDice:
+            action.damageDice.append(i)
         action.damageBonus = int(f.readline().strip(" \n"))
         action.crit = int(f.readline().strip(" \n"))
-        action.critDice = f.readline().strip(" \n")
+        damageDice = f.readline().strip(" \n").split(", ")
+        action.critDice = []
+        for i in damageDice:
+            action.critDice.append(i)
         action.critBonus = int(f.readline().strip(" \n"))
         actionList[name] = action
 
     elif(type == 2): #Spell with save
         action.dc = f.readline().strip(" \n")
-        action.damageDice = f.readline().strip(" \n")
+        damageDice = f.readline().strip(" \n").split(", ")
+        action.damageDice = []
+        for i in damageDice:
+            action.damageDice.append(i)
         action.damageBonus = int(f.readline().strip(" \n"))
         action.saveEffect = f.readline().strip(" \n")
         actionList[name] = action
