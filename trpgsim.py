@@ -106,31 +106,97 @@ for i in characterFiles:
 print(characterList)
 print("---------------------------------------------------------------------")
 
+
+
 mainWindow = tk.Tk()
 mainWindow.title("Tabletop Battle Sim")
 mainWindow.geometry("1600x910")
 
-charFrame = tk.Frame(mainWindow, bg = "#C40000", height = 910, width = 300)
+#SECTION A
+
+charFrame = tk.Frame(mainWindow, height = 910, width = 300)
 charFrame.grid(column=0, row=0)
+charFrame.grid_propagate(0)
+
+charFilterFrame = tk.Frame(charFrame, bg="#B6B6B6", height = 150, width=300)
+charFilterFrame.grid(column=0, row=0)
+charFilterFrame.grid_propagate(0)
+
+charFilterButtonPC = tk.Button(charFilterFrame, text="PCs", font = ("Arial", 19), width=19, height=1)
+charFilterButtonPC.grid(column=0, row=0)
+
+charFilterButtonNPC = tk.Button(charFilterFrame, text="NPCs",font = ("Arial", 19), width=19, height=1)
+charFilterButtonNPC.grid(column=0, row=1)
+
+charFilterButtonBoss = tk.Button(charFilterFrame, text="Bosses",font = ("Arial", 19), width=19, height=1)
+charFilterButtonBoss.grid(column=0, row=2)
+
+
+charListFrame = tk.Frame(charFrame, bg="#C40000", height = 760, width=300)
+charListFrame.grid(column=0, row=1)
+charListFrame.grid_propagate(0)
+
+charListScrollbar = tk.Scrollbar(charListFrame)
+charListScrollbar.grid(column=1, row=0, sticky = "NS")
+
+charListCanvas = tk.Canvas(charListFrame, bg="#00C400", height = 760, width=279, scrollregion = (0,0,279,1000), yscrollcommand = charListScrollbar.set)
+charListCanvas.grid(column=0, row=0, sticky="EW")
+charListCanvas.grid_propagate(0)
+
+charListScrollbar.config(command = charListCanvas.yview)
+
+newFrame = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
+newFrame.grid(column=0, row=0)
+newFrame2 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
+newFrame2.grid(column=0, row=1)
+newFrame3 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
+newFrame3.grid(column=0, row=2)
+newFrame4 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
+newFrame4.grid(column=0, row=3)
+newFrame5 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
+newFrame5.grid(column=0, row=4)
+newFrame6 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
+newFrame6.grid(column=0, row=5)
+newFrame7 = tk.Frame(charListCanvas, bg="#0000C4", height=100, width=279)
+newFrame7.grid(column=0, row=6)
+newFrame8 = tk.Frame(charListCanvas, bg="#C400C4", height=100, width=279)
+newFrame8.grid(column=0, row=7)
+newFrame9 = tk.Frame(charListCanvas, bg="#C4C4C4", height=100, width=279)
+newFrame9.grid(column=0, row=8)
+
+
+charListCanvas.config(scrollregion = charListCanvas.bbox("all"))
+
+
+
+
+
+#SECTION B
 
 activeCharFrame = tk.Frame(mainWindow, height = 910, width = 600)
 activeCharFrame.grid(column=1, row=0)
+activeCharFrame.grid_propagate(0)
 
 activeDataFrame = tk.Frame(activeCharFrame, bg = "#0C00C4", height = 300, width = 600)
 activeDataFrame.grid(column=0, row=0)
+activeDataFrame.grid_propagate(0)
 
 attacksFrame = tk.Frame(activeCharFrame, bg = "#18C400", height = 400, width = 600)
 attacksFrame.grid(column=0, row=1)
+attacksFrame.grid_propagate(0)
 
 combatLogFrame = tk.Frame(activeCharFrame, bg = "#AC3BF6", height = 210, width = 600)
 combatLogFrame.grid(column=0, row=2)
+combatLogFrame.grid_propagate(0)
 
 otherCharsFrame = tk.Frame(mainWindow, bg="#EBF63B", height = 910, width = 400)
 otherCharsFrame.grid(column=2, row=0)
+otherCharsFrame.grid_propagate(0)
 
 turnsFrame = tk.Frame(mainWindow, bg="#11E9ff", height = 910, width = 300)
 turnsFrame.grid(column=3, row=0)
+turnsFrame.grid_propagate(0)
 
 
 
-#mainWindow.mainloop()
+mainWindow.mainloop()
