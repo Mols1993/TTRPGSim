@@ -7,10 +7,10 @@ import PIL.ImageTk
 import os
 
 class Character:
-    type = name = image = hp = ac = str = dex = con = int = wis = cha = prof = spellScore = savingThrows = actions = 0
+    type = name = image = hp = ac = str = dex = con = int = wis = cha = prof = spellScore = savingThrows = actions = currentHP = 0
 
     def __repr__(self):
-        return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Image: " + str(self.image) + "\n" + "HP: " + str(self.hp) + "\n" + "AC: " + str(self.ac) + "\n" + "STR: " + str(self.str) + "\n" + "DEX: " + str(self.dex) + "\n" + "CON: " + str(self.con) + "\n" + "INT: " + str(self.int) + "\n" + "WIS: " + str(self.wis) + "\n" + "CHA: " + str(self.cha) + "\n" + "Proficiency Bonus: " + str(self.prof) + "\n" + "Spell Ability: " + str(self.spellScore) + "\n" + "Saving Throws: " + str(self.savingThrows) + "\n" + "Actions: " + str(self.actions) + "\n"
+        return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Image: " + str(self.image) + "\n" + "HP: " + str(self.hp) + "\n" + "Current HP: " + str(self.currentHP) + "\n" + "AC: " + str(self.ac) + "\n" + "STR: " + str(self.str) + "\n" + "DEX: " + str(self.dex) + "\n" + "CON: " + str(self.con) + "\n" + "INT: " + str(self.int) + "\n" + "WIS: " + str(self.wis) + "\n" + "CHA: " + str(self.cha) + "\n" + "Proficiency Bonus: " + str(self.prof) + "\n" + "Spell Ability: " + str(self.spellScore) + "\n" + "Saving Throws: " + str(self.savingThrows) + "\n" + "Actions: " + str(self.actions) + "\n"
 
 class Action:
     type = name = score = attackBonus = damageDice = damageBonus = crit = critDice = critBonus = dc = saveEffect = hybrids = 0
@@ -70,6 +70,7 @@ def parseCharacter(name):
     character.name = f.readline().strip(" \n")
     character.image = f.readline().strip(" \n")
     character.hp = int(f.readline().strip(" \n"))
+    character.currentHP = character.hp
     character.ac = int(f.readline().strip(" \n"))
     scores = f.readline().strip(" \n").split(", ")
     character.str = int(scores[0])
@@ -103,7 +104,7 @@ for i in actionList:
         for j in aux:
             actionList[i].hybrids.append(actionList[j])
 
-print(actionList)
+#print(actionList)
 print("---------------------------------------------------------------------")
 
 characterFiles = os.listdir(path="characters")
@@ -112,9 +113,100 @@ characterList = {}
 for i in characterFiles:
     parseCharacter(i)
 
-print(characterList)
+#print(characterList)
 print("---------------------------------------------------------------------")
 
+def addCharacter(event):
+    charSelected = event.widget.master.winfo_children()[1]["text"]
+    charSelected = characterList[charSelected]
+    activeCharacter = charSelected
+
+    for i in activeDataFrame.winfo_children():
+        i.destroy()
+
+    activeDataFrame.rowconfigure(2, weight = 1)
+
+    nameLabel = tk.Label(activeDataFrame, text = charSelected.name, font = ("Arial", 22))
+    nameLabel.grid(row = 0, column = 0, sticky = "ew")
+
+    frame1 = tk.Frame(activeDataFrame)
+    frame1.grid(row = 1, column = 0, sticky = "ew")
+    frame1.rowconfigure(1, weight=1)
+
+    try:
+        portrait = PIL.Image.open("portraits/" + charSelected.image)
+    except:
+        portrait = PIL.Image.open("portraits/default.png")
+
+    portrait = portrait.resize((80,80), PIL.Image.ANTIALIAS)
+    TKportrait = PIL.ImageTk.PhotoImage(portrait)
+    portraitLabel = tk.Label(frame1, image = TKportrait)
+    portraitLabel.image = TKportrait
+    portraitLabel.grid(row = 0, column = 0)
+
+    frame1Sub1 = tk.Frame(frame1, width = 520)
+    frame1Sub1.grid(row = 0, column = 1)
+    frame1Sub1.columnconfigure(0, weight=1)
+
+    hpGreen = PIL.Image.open("images/hpGreen.png")
+    hpRed = PIL.Image.open("images/hpRed.png")
+
+    hpWidth = (charSelected.currentHP / charSelected.hp) * 500
+
+    hpGreen = hpGreen.resize((int(hpWidth + 1), 50), PIL.Image.ANTIALIAS)
+    hpGreen = PIL.ImageTk.PhotoImage(hpGreen)
+
+    hpRed = hpRed.resize((int(500 - hpWidth + 1), 50), PIL.Image.ANTIALIAS)
+    hpRed = PIL.ImageTk.PhotoImage(hpRed)
+
+    hpBarFrame = tk.Frame(frame1Sub1, padx = 5)
+    hpBarFrame.grid(row = 0, column = 0)
+
+    hpGreenLabel = tk.Label(hpBarFrame, image = hpGreen, bd = -2)
+    hpGreenLabel.image = hpGreen
+    hpGreenLabel.grid(row = 0, column = 0)
+
+    hpRedLabel = tk.Label(hpBarFrame, image = hpRed, bd = -2)
+    hpRedLabel.image = hpRed
+    hpRedLabel.grid(row = 0, column = 1)
+
+    frame1Sub2 = tk.Frame(frame1Sub1)
+    frame1Sub2.grid(row = 1, column = 0, columnspan = 2)
+    frame1Sub2.columnconfigure(0, weight=1)
+    frame1Sub2.columnconfigure(1, weight=1)
+
+    hpLabel = tk.Label(frame1Sub2, text = "HP: " + str(int(charSelected.currentHP)) + "/" + str(charSelected.hp), font = ("Arial", 19))
+    hpLabel.grid(row = 0, column = 0, sticky = "ew")
+
+    acLabel = tk.Label(frame1Sub2, text = "AC: " + str(charSelected.ac), font = ("Arial", 19))
+    acLabel.grid(row = 0, column = 1, sticky = "ew")
+
+    frame2 = tk.Frame(activeDataFrame)
+    frame2.grid(row = 2, column = 0, sticky = "nsew")
+    frame2.columnconfigure(0, weight = 1)
+    frame2.columnconfigure(1, weight = 1)
+    frame2.columnconfigure(2, weight = 1)
+    frame2.rowconfigure(0, weight = 1)
+    frame2.rowconfigure(1, weight = 1)
+    frame2.rowconfigure(2, weight = 1)
+
+    strLabel = tk.Label(frame2, text = "STR: " + str(charSelected.str), font = ("Arial", 19))
+    dexLabel = tk.Label(frame2, text = "DEX: " + str(charSelected.dex), font = ("Arial", 19))
+    conLabel = tk.Label(frame2, text = "CON: " + str(charSelected.con), font = ("Arial", 19))
+    intLabel = tk.Label(frame2, text = "INT: " + str(charSelected.int), font = ("Arial", 19))
+    wisLabel = tk.Label(frame2, text = "WIS: " + str(charSelected.wis), font = ("Arial", 19))
+    chaLabel = tk.Label(frame2, text = "CHA: " + str(charSelected.cha), font = ("Arial", 19))
+    profLabel = tk.Label(frame2, text = "Prof: " + str(charSelected.prof), font = ("Arial", 19))
+    editButton = tk.Button(frame2, text = "Edit", font = ("Arial", 19))
+
+    strLabel.grid(row = 0, column = 0)
+    dexLabel.grid(row = 0, column = 1)
+    conLabel.grid(row = 0, column = 2)
+    intLabel.grid(row = 1, column = 0)
+    wisLabel.grid(row = 1, column = 1)
+    chaLabel.grid(row = 1, column = 2)
+    profLabel.grid(row = 2, column = 0)
+    editButton.grid(row = 2, column = 2)
 
 
 mainWindow = tk.Tk()
@@ -211,6 +303,7 @@ def createCharList():
         nameLabel.grid(column=1, row=0)
 
         addButton = tk.Button(newCharFrame, text = "Add", font = ("Arial", 18))
+        addButton.bind("<Button-1>", addCharacter)
         addButton.grid(column=1, row=1)
         count += 1
 
@@ -240,15 +333,20 @@ createCharList()
 
 #SECTION B
 
+activeCharacter = None
+
+#SECTION C
+
 activeCharFrame = tk.Frame(mainWindow, height = 910, width = 600)
 activeCharFrame.grid(column=1, row=0)
 activeCharFrame.grid_propagate(0)
 
-activeDataFrame = tk.Frame(activeCharFrame, bg = "#0C00C4", height = 300, width = 600)
+activeDataFrame = tk.Frame(activeCharFrame, bg = "blue", height = 300, width = 600)
 activeDataFrame.grid(column=0, row=0)
 activeDataFrame.grid_propagate(0)
+activeDataFrame.columnconfigure(0, weight=1)
 
-attacksFrame = tk.Frame(activeCharFrame, bg = "#18C400", height = 400, width = 600)
+attacksFrame = tk.Frame(activeCharFrame, bg = "green", height = 400, width = 600)
 attacksFrame.grid(column=0, row=1)
 attacksFrame.grid_propagate(0)
 
