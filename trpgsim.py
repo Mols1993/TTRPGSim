@@ -214,20 +214,23 @@ def createCharList():
         addButton.grid(column=1, row=1)
         count += 1
 
-#def toggleCharfilter(filter):
-#    if(filter == "PC"):
-#        flagPCfilter = not flagPCfilter
-#        createCharList()
-#    elif(filter == "NPC"):
-#        flagNPCfilter = not flagNPCfilter
-#        createCharList()
-#    elif(filter == "BOSS"):
-#        flagBOSSfilter = not flagBOSSfilter
-#        createCharList()
-#        
-#charFilterButtonPC.configure(command = lambda: toggleCharfilter("PC"))
-#charFilterButtonNPC.configure(command = lambda: toggleCharfilter("NPC"))
-#charFilterButtonBoss.configure(command = lambda: toggleCharfilter("BOSS"))
+def toggleCharfilter(filter):
+    if(filter == "PC"):
+        global flagPCfilter
+        flagPCfilter= not flagPCfilter
+        createCharList()
+    elif(filter == "NPC"):
+        global flagNPCfilter 
+        flagNPCfilter = not flagNPCfilter
+        createCharList()
+    elif(filter == "BOSS"):
+        global flagBOSSfilter 
+        flagBOSSfilter = not flagBOSSfilter
+        createCharList()
+        
+charFilterButtonPC.configure(command = lambda: toggleCharfilter("PC"))
+charFilterButtonNPC.configure(command = lambda: toggleCharfilter("NPC"))
+charFilterButtonBoss.configure(command = lambda: toggleCharfilter("BOSS"))
 
 
 createCharList()
