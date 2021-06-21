@@ -123,6 +123,10 @@ mainWindow.geometry("1600x910")
 
 #SECTION A
 
+flagPCfilter = False
+flagNPCfilter = False
+flagBOSSfilter = False
+
 charFrame = tk.Frame(mainWindow, height = 910, width = 300)
 charFrame.grid(column=0, row=0)
 charFrame.grid_propagate(0)
@@ -133,15 +137,18 @@ charFilterFrame.grid(column=0, row=0, sticky="EW")
 
 charFilterFrame.columnconfigure(0, weight=1)
 
-charFilterButtonPC = tk.Button(charFilterFrame, text="PCs", font = ("Arial", 19))
+charFilterButtonPC = tk.Button(charFilterFrame, text="PCs", font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
 charFilterButtonPC.grid(column=0, row=0, sticky="EW")
 
-charFilterButtonNPC = tk.Button(charFilterFrame, text="NPCs",font = ("Arial", 19))
+charFilterButtonNPC = tk.Button(charFilterFrame, text="NPCs",font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
 charFilterButtonNPC.grid(column=0, row=1, sticky="EW")
 
-charFilterButtonBoss = tk.Button(charFilterFrame, text="Bosses",font = ("Arial", 19))
+charFilterButtonBoss = tk.Button(charFilterFrame, text="Bosses",font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
 charFilterButtonBoss.grid(column=0, row=2, sticky="EW")
 
+
+
+#########################
 
 charListFrame = tk.Frame(charFrame, bg="#C40000", height = 760, width=300)
 charListFrame.grid(column=0, row=1)
@@ -157,14 +164,75 @@ charListCanvas.grid_propagate(0)
 charListCanvas.configure(yscrollcommand = charListScrollbar.set)
 charListScrollbar.configure(command = charListCanvas.yview)
 
-newFrame = tk.Frame(charListCanvas, bg="#0000C4", height=1000, width=279)
-newFrame.grid(column=0, row=0)
+charListMagicFrame = tk.Frame(charListCanvas, bg="#0000C4", height=1000, width=279)
+charListMagicFrame.grid(column=0, row=0)
 
-charListCanvas.create_window((0,0), window=newFrame, anchor="nw")
-newFrame2 = tk.Frame(newFrame, bg="#0000C4", height=100, width=400)
-newFrame2.grid(column=0, row=0)
-#newFrame3 = tk.Frame(newFrame, bg="#00C4C4", height=100, width=279)
-#newFrame3.grid(column=0, row=1)
+charListCanvas.create_window((0,0), window=charListMagicFrame, anchor="nw")
+
+######################
+
+def createCharList():
+    charKeys = characterList.keys()
+    charList = []
+    for char in charKeys:
+        if(characterList[char].type == "PC" and flagPCfilter): continue
+        if(characterList[char].type == "NPC" and flagNPCfilter): continue
+        if(characterList[char].type == "BOSS" and flagBOSSfilter): continue
+        charList.append(char)
+
+    for widget in charListMagicFrame.winfo_children():
+        widget.destroy()
+        
+    if(len(charList) > 10):
+        newHeight = len(charList)*100
+        charListCanvas.configure(scrollregion = (0,0,279,newHeight))
+        charListMagicFrame.configure(height = newHeight)
+    
+    count = 0
+    for char in charList:
+        newCharFrame = tk.Frame(charListMagicFrame, height=100, width=279, relief = tk.GROOVE, borderwidth = 4)
+        newCharFrame.grid(column = 0, row = count)
+        newCharFrame.grid_propagate(0)
+        newCharFrame.columnconfigure(1, weight=3)
+        
+        try:
+            portrait = PIL.Image.open("portraits/"+characterList[char].image)
+        except:
+            portrait = PIL.Image.open("portraits/default.png")
+
+        portrait = portrait.resize((80,80), PIL.Image.ANTIALIAS)
+        TKportrait = PIL.ImageTk.PhotoImage(portrait)
+
+        portraitLabel = tk.Label(newCharFrame, image = TKportrait)
+        portraitLabel.image = TKportrait
+        portraitLabel.grid(column=0, row=0, rowspan = 2, padx = 4, pady = 4)
+
+        nameLabel = tk.Label(newCharFrame, text = characterList[char].name, font = ("Arial", 15))
+        nameLabel.grid(column=1, row=0)
+
+        addButton = tk.Button(newCharFrame, text = "Add", font = ("Arial", 18))
+        addButton.grid(column=1, row=1)
+        count += 1
+
+#def toggleCharfilter(filter):
+#    if(filter == "PC"):
+#        flagPCfilter = not flagPCfilter
+#        createCharList()
+#    elif(filter == "NPC"):
+#        flagNPCfilter = not flagNPCfilter
+#        createCharList()
+#    elif(filter == "BOSS"):
+#        flagBOSSfilter = not flagBOSSfilter
+#        createCharList()
+#        
+#charFilterButtonPC.configure(command = lambda: toggleCharfilter("PC"))
+#charFilterButtonNPC.configure(command = lambda: toggleCharfilter("NPC"))
+#charFilterButtonBoss.configure(command = lambda: toggleCharfilter("BOSS"))
+
+
+createCharList()
+
+
 
 
 #SECTION B
