@@ -88,6 +88,13 @@ def parseCharacter(name):
         character.actions.append(actionList[x])
         x = f.readline().strip(" \n")
     characterList[character.name] = character
+    
+def createDiceString(diceList):
+    out = ""
+    for dice in diceList:
+        out += dice+"+"
+    return out[:-1]
+        
 
 actionFiles = os.listdir(path="actions")
 actionList = {}
@@ -221,6 +228,8 @@ def addCharacter(event):
     chaLabel.grid(row = 1, column = 2)
     profLabel.grid(row = 2, column = 0)
     editButton.grid(row = 2, column = 2)
+    
+    createMoveList(activeCharacter)
 
 
 mainWindow = tk.Tk()
@@ -239,7 +248,6 @@ charFrame.grid_propagate(0)
 
 charFilterFrame = tk.Frame(charFrame, bg="#B6B6B6", height = 150, width=300)
 charFilterFrame.grid(column=0, row=0, sticky="EW")
-#charFilterFrame.grid_propagate(0)
 
 charFilterFrame.columnconfigure(0, weight=1)
 
@@ -349,8 +357,6 @@ createCharList()
 
 activeCharacter = None
 
-#SECTION C
-
 activeCharFrame = tk.Frame(mainWindow, height = 910, width = 600)
 activeCharFrame.grid(column=1, row=0)
 activeCharFrame.grid_propagate(0)
@@ -360,9 +366,119 @@ activeDataFrame.grid(column=0, row=0)
 activeDataFrame.grid_propagate(0)
 activeDataFrame.columnconfigure(0, weight=1)
 
-attacksFrame = tk.Frame(activeCharFrame, bg = "green", height = 400, width = 600)
-attacksFrame.grid(column=0, row=1)
-attacksFrame.grid_propagate(0)
+
+#Section C
+
+attackListFrame = tk.Frame(activeCharFrame, bg = "green", height = 400, width = 600)
+attackListFrame.grid(column=0, row=1)
+attackListFrame.grid_propagate(0)
+
+
+def createMoveList(activeCharacter):
+
+    for widget in attackListFrame.winfo_children():
+        widget.destroy()
+
+    attackListScrollbar = tk.Scrollbar(attackListFrame, orient="vertical")
+    attackListScrollbar.grid(column=1, row=0, sticky = "NS")
+
+    attackListCanvas = tk.Canvas(attackListFrame, bg="#00C400", height=400, width=579, scrollregion = (0,0,579,1000))
+    attackListCanvas.grid(column=0, row=0, sticky="EW")
+    attackListCanvas.grid_propagate(0)
+
+    attackListCanvas.configure(yscrollcommand = attackListScrollbar.set)
+    attackListScrollbar.configure(command = attackListCanvas.yview)
+
+    attackListMagicFrame = tk.Frame(attackListCanvas, bg="#0000C4", height=1000, width=579)
+    attackListMagicFrame.grid(column=0, row=0)
+    attackListMagicFrame.grid_propagate(0)
+
+    attackListCanvas.create_window((0,0), window=attackListMagicFrame, anchor="nw")
+    
+    count = 0
+    for action in  activeCharacter.actions:
+        if (action.type == 1 or action.type == 2):
+            count += 1
+    if (count > 10):
+        attackListCanvas.configure(scrollregion = (0,0,579,100*count))
+        attackListMagicFrame.configure(height=100*count)
+    
+    count = 0
+    for action in activeCharacter.actions:
+        if (action.type == 1):
+            newActionFrame = tk.Frame(attackListMagicFrame, height=100, width=579, relief = tk.GROOVE, borderwidth = 4)
+            newActionFrame.grid(column=0, row=count)
+            newActionFrame.grid_propagate(0)
+            
+            newActionButton = tk.Button(newActionFrame, text = action.name, font = ("Arial", 18))
+            newActionButton.grid(column=0, row=0, rowspan=2)
+            
+            if(action.attackBonus >= 0):
+                newHitLabel = tk.Label(newActionFrame, text = "Hit +"+str(action.attackBonus), font = ("Arial", 15))
+            else:
+                newHitLabel = tk.Label(newActionFrame, text = "Hit "+str(action.attackBonus), font = ("Arial", 15))
+            newHitLabel.grid(column=1, row=0)
+            
+            newCritLabel = tk.Label(newActionFrame, text = "Crit: "+str(action.crit), font = ("Arial", 15))
+            newCritLabel.grid(column=1, row=1)
+            
+            newDamageLabel = tk.Label(newActionFrame, text= "Damage: "+createDiceString(action.damageDice)+"+"+str(action.damageBonus), font= ("Arial", 15))
+            newDamageLabel.grid(column=2, row=0)
+            
+            newCombobox = ttk.Combobox(newActionFrame)
+            newCombobox.grid(column=2, row=1)
+            newCombobox["values"] = ("Normal", "Advantage", "Disadvantage")
+            newCombobox.current(0)
+            newCombobox["state"] = "readonly"
+            
+            newAttackButton = tk.Button(newActionFrame, text = "Attack!", font = ("Arial", 15))
+            newAttackButton.grid(column=3, row=0)
+            
+            newEditButton = tk.Button(newActionFrame, text = "Edit", font = ("Arial", 15))
+            newEditButton.grid(column=3, row=1)
+            
+            newActionFrame.columnconfigure(0, weight = 2)
+            newActionFrame.columnconfigure(1, weight = 1)
+            newActionFrame.columnconfigure(2, weight = 2)
+            newActionFrame.columnconfigure(3, weight = 2)
+            
+            count += 1
+        elif (action.type == 2):
+            newActionFrame = tk.Frame(attackListMagicFrame, height=100, width=579, relief = tk.GROOVE, borderwidth = 4)
+            newActionFrame.grid(column=0, row=count)
+            newActionFrame.grid_propagate(0)
+
+            newActionButton = tk.Button(newActionFrame, text = action.name, font = ("Arial", 18))
+            newActionButton.grid(column=0, row=0, rowspan=2)
+
+            newTypeLabel = tk.Label(newActionFrame, text = action.dc+" save" , font = ("Arial", 15))
+            newTypeLabel.grid(column=1, row=0)
+
+            newDCLabel = tk.Label(newActionFrame, text = "DC: ?", font = ("Arial", 15))
+            newDCLabel.grid(column=1, row=1)
+
+            newDamageLabel = tk.Label(newActionFrame, text= "Damage: "+createDiceString(action.damageDice)+"+"+str(action.damageBonus), font= ("Arial", 15))
+            newDamageLabel.grid(column=2, row=0)
+
+            newSaveTypeLabel = tk.Label(newActionFrame, text= "Save type: "+action.saveEffect, font = ("Arial, 15"))
+            newSaveTypeLabel.grid(column=2, row=1)
+
+            newAttackButton = tk.Button(newActionFrame, text = "Attack!", font = ("Arial", 15))
+            newAttackButton.grid(column=3, row=0)
+
+            newEditButton = tk.Button(newActionFrame, text = "Edit", font = ("Arial", 15))
+            newEditButton.grid(column=3, row=1)
+
+            newActionFrame.columnconfigure(0, weight = 2)
+            newActionFrame.columnconfigure(1, weight = 1)
+            newActionFrame.columnconfigure(2, weight = 2)
+            newActionFrame.columnconfigure(3, weight = 2)
+
+            count += 1
+            
+
+
+############################
 
 combatLogFrame = tk.Frame(activeCharFrame, bg = "#AC3BF6", height = 210, width = 600)
 combatLogFrame.grid(column=0, row=2)
