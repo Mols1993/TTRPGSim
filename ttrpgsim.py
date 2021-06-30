@@ -119,6 +119,7 @@ print("---------------------------------------------------------------------")
 def addCharacter(event):
     charSelected = event.widget.master.winfo_children()[1]["text"]
     charSelected = characterList[charSelected]
+    global activeCharacter
     activeCharacter = charSelected
 
     for i in activeDataFrame.winfo_children():
@@ -164,11 +165,13 @@ def addCharacter(event):
 
     hpGreenLabel = tk.Label(hpBarFrame, image = hpGreen, bd = -2)
     hpGreenLabel.image = hpGreen
-    hpGreenLabel.grid(row = 0, column = 0)
+    if(hpGreen.width() > 1):
+        hpGreenLabel.grid(row = 0, column = 0)
 
     hpRedLabel = tk.Label(hpBarFrame, image = hpRed, bd = -2)
     hpRedLabel.image = hpRed
-    hpRedLabel.grid(row = 0, column = 1)
+    if(hpRed.width() > 1):
+        hpRedLabel.grid(row = 0, column = 1)
 
     frame1Sub2 = tk.Frame(frame1Sub1)
     frame1Sub2.grid(row = 1, column = 0, columnspan = 2)
@@ -190,13 +193,24 @@ def addCharacter(event):
     frame2.rowconfigure(1, weight = 1)
     frame2.rowconfigure(2, weight = 1)
 
-    strLabel = tk.Label(frame2, text = "STR: " + str(charSelected.str), font = ("Arial", 19))
-    dexLabel = tk.Label(frame2, text = "DEX: " + str(charSelected.dex), font = ("Arial", 19))
-    conLabel = tk.Label(frame2, text = "CON: " + str(charSelected.con), font = ("Arial", 19))
-    intLabel = tk.Label(frame2, text = "INT: " + str(charSelected.int), font = ("Arial", 19))
-    wisLabel = tk.Label(frame2, text = "WIS: " + str(charSelected.wis), font = ("Arial", 19))
-    chaLabel = tk.Label(frame2, text = "CHA: " + str(charSelected.cha), font = ("Arial", 19))
-    profLabel = tk.Label(frame2, text = "Prof: " + str(charSelected.prof), font = ("Arial", 19))
+    colors = {
+        "str": "black",
+        "dex": "black",
+        "con": "black",
+        "int": "black",
+        "wis": "black",
+        "cha": "black"
+        }
+    for i in charSelected.savingThrows:
+        colors[i] = "blue"
+
+    strLabel = tk.Label(frame2, text = "STR: " + str(charSelected.str), font = ("Arial", 19), fg = colors["str"])
+    dexLabel = tk.Label(frame2, text = "DEX: " + str(charSelected.dex), font = ("Arial", 19), fg = colors["dex"])
+    conLabel = tk.Label(frame2, text = "CON: " + str(charSelected.con), font = ("Arial", 19), fg = colors["con"])
+    intLabel = tk.Label(frame2, text = "INT: " + str(charSelected.int), font = ("Arial", 19), fg = colors["int"])
+    wisLabel = tk.Label(frame2, text = "WIS: " + str(charSelected.wis), font = ("Arial", 19), fg = colors["wis"])
+    chaLabel = tk.Label(frame2, text = "CHA: " + str(charSelected.cha), font = ("Arial", 19), fg = colors["cha"])
+    profLabel = tk.Label(frame2, text = "Prof: " + str(charSelected.prof), font = ("Arial", 19), fg = "blue")
     editButton = tk.Button(frame2, text = "Edit", font = ("Arial", 19))
 
     strLabel.grid(row = 0, column = 0)
