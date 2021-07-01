@@ -7,6 +7,21 @@ image.png
 4
 int
 con, int
+*
+1
 longsword
+str
+1
+2d6
+2
+1
+2d6, 1d4
+3
+*
+2
 fireball
-fire bolt
+dex
+16
+3d8, 3d6
+3
+half
