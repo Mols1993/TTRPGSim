@@ -2,15 +2,17 @@
 from tkinter import Toplevel, ttk
 import math
 import random
+import copy
 import PIL.Image
+from PIL.Image import init
 import PIL.ImageTk
 import os
 
 class Character:
-    type = name = image = hp = ac = str = dex = con = intt = wis = cha = prof = spellScore = savingThrows = actions = currentHP = 0
+    type = name = image = hp = ac = str = dex = con = intt = wis = cha = prof = spellScore = savingThrows = actions = currentHP = initiative = 0
 
     def __repr__(self):
-        return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Image: " + str(self.image) + "\n" + "HP: " + str(self.hp) + "\n" + "Current HP: " + str(self.currentHP) + "\n" + "AC: " + str(self.ac) + "\n" + "STR: " + str(self.str) + "\n" + "DEX: " + str(self.dex) + "\n" + "CON: " + str(self.con) + "\n" + "INT: " + str(self.intt) + "\n" + "WIS: " + str(self.wis) + "\n" + "CHA: " + str(self.cha) + "\n" + "Proficiency Bonus: " + str(self.prof) + "\n" + "Spell Ability: " + str(self.spellScore) + "\n" + "Saving Throws: " + str(self.savingThrows) + "\n" + "Actions: " + str(self.actions) + "\n"
+        return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Image: " + str(self.image) + "\n" + "HP: " + str(self.hp) + "\n" + "Current HP: " + str(self.currentHP) + "\n" + "AC: " + str(self.ac) + "\n" + "Initiative: " + str(self.initiative) + "\n" + "STR: " + str(self.str) + "\n" + "DEX: " + str(self.dex) + "\n" + "CON: " + str(self.con) + "\n" + "INT: " + str(self.intt) + "\n" + "WIS: " + str(self.wis) + "\n" + "CHA: " + str(self.cha) + "\n" + "Proficiency Bonus: " + str(self.prof) + "\n" + "Spell Ability: " + str(self.spellScore) + "\n" + "Saving Throws: " + str(self.savingThrows) + "\n" + "Actions: " + str(self.actions) + "\n"
 
 class Action:
     type = name = score = attackBonus = damageDice = damageBonus = crit = critDice = critBonus = dcSave = dcScore = saveEffect = hybrids = 0
@@ -72,6 +74,7 @@ def parseCharacter(name):
     character.hp = int(f.readline().strip(" \n"))
     character.currentHP = character.hp
     character.ac = int(f.readline().strip(" \n"))
+    character.initiative = int(f.readline().strip(" \n"))
     scores = f.readline().strip(" \n").split(", ")
     character.str = int(scores[0])
     character.dex = int(scores[1])
@@ -416,7 +419,7 @@ def editActionWindow(event, name):
         saveButton.bind(saveButton.bind("<Button-1>", lambda event = event, dcSave = dcSaveDropdown, dcScore = dcScoreInput, saveEffect = saveEffectInput, damageDice = damageDiceInput, damageBonus = damageBonusInput, character = activeCharacter.name, action = action.name, window = root: saveType2StatChanges(event, dcSave, dcScore, saveEffect, damageDice, damageBonus, character, action, window)))
 
 
-def saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, intt, wis, cha, prof, spellScore, saves, window):
+def saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, intt, wis, cha, prof, spellScore, initiative, saves, window):
 
     type = type.get()
     currentHP = int(currentHP.get("@0, 0", tk.END).strip(" \n"))
@@ -430,26 +433,28 @@ def saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, 
     cha = int(cha.get("@0, 0", tk.END).strip(" \n"))
     prof = int(prof.get("@0, 0", tk.END).strip(" \n"))
     spellScore = spellScore.get().upper()
+    initiative = int(initiative.get("@0, 0", tk.END).strip(" \n"))
     saves = saves.get("@0, 0", tk.END).strip(" \n").upper().split(", ")
 
     #type = name = image = hp = ac = str = dex = con = intt = wis = cha = prof = spellScore = savingThrows = actions = currentHP = 0
 
 
-    characterList[name].type = type
-    characterList[name].currentHP = currentHP
-    characterList[name].hp = maxHP
-    characterList[name].ac = ac
-    characterList[name].str = str
-    characterList[name].dex = dex
-    characterList[name].con = con
-    characterList[name].intt = intt
-    characterList[name].wis = wis
-    characterList[name].cha = cha
-    characterList[name].prof = prof
-    characterList[name].spellScore = spellScore
-    characterList[name].savingThrows = saves
+    activeCharacter.type = type
+    activeCharacter.currentHP = currentHP
+    activeCharacter.hp = maxHP
+    activeCharacter.ac = ac
+    activeCharacter.str = str
+    activeCharacter.dex = dex
+    activeCharacter.con = con
+    activeCharacter.intt = intt
+    activeCharacter.wis = wis
+    activeCharacter.cha = cha
+    activeCharacter.prof = prof
+    activeCharacter.spellScore = spellScore
+    activeCharacter.initiative = initiative
+    activeCharacter.savingThrows = saves
 
-    addCharacter(None, name)
+    addCharacter(None, activeCharacter)
     window.destroy()
 
 def editCharWindowParser(event):
@@ -639,10 +644,20 @@ def editCharWindow(character):
     subFrame2_2 = tk.Frame(frame2)
     subFrame2_2.grid(row = 0, column = 2, sticky = "ew")
 
-    savesLabel = tk.Label(subFrame2_2, text = "Saves:", font = ("Arial", 10))
+    initiativeLabel = tk.Label(subFrame2_2, text = "Initiative:", font = ("Arial", 10))
+    initiativeLabel.grid(row = 0, column = 0)
+
+    initiativeInput = tk.Text(subFrame2_2, height = 1, width = 3)
+    initiativeInput.grid(row = 0, column = 1)
+    initiativeInput.insert(tk.INSERT, character.initiative)
+
+    subFrame2_3 = tk.Frame(frame2)
+    subFrame2_3.grid(row = 0, column = 3, sticky = "ew")
+
+    savesLabel = tk.Label(subFrame2_3, text = "Saves:", font = ("Arial", 10))
     savesLabel.grid(row = 0, column = 0)
 
-    savesInput = tk.Text(subFrame2_2, height = 1, width = 20)
+    savesInput = tk.Text(subFrame2_3, height = 1, width = 20)
     savesInput.grid(row = 0, column = 1)
 
     savesText = ", ".join(character.savingThrows)
@@ -658,16 +673,33 @@ def editCharWindow(character):
 
     #print(spellScore)
 
-    saveButton.bind("<Button-1>", lambda event, name = character.name, type = typeDropdown, currentHP = currentHPInput, maxHP = maxHPInput, ac = acInput, str = strInput, dex = dexInput, con = conInput, int = intInput, wis = wisInput, cha = chaInput, prof = profInput, spellScore = spellScoreDropdown, saves = savesInput, window = root: saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, int, wis, cha, prof, spellScore, saves, window))
+    saveButton.bind("<Button-1>", lambda event, name = character.name, type = typeDropdown, currentHP = currentHPInput, maxHP = maxHPInput, ac = acInput, str = strInput, dex = dexInput, con = conInput, int = intInput, wis = wisInput, cha = chaInput, prof = profInput, spellScore = spellScoreDropdown, initiative = initiativeInput, saves = savesInput, window = root: saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, int, wis, cha, prof, spellScore, initiative, saves, window))
 
     
-
-
-def addCharacter(event, name):
-    charSelected = name
-    charSelected = characterList[charSelected]
+def addCharacterToSimulated(event, name):
+    global simulatedCharacters
     global activeCharacter
-    activeCharacter = charSelected
+
+    character = copy.deepcopy(characterList[name])
+    n = character.name + " 1"
+    c = 2
+
+    for i in simulatedCharacters:
+        if i.name == n:
+            n = character.name + " " + str(c)
+            c = c + 1
+
+    character.name = n
+
+    simulatedCharacters.append(character)
+    activeCharacter = simulatedCharacters[-1]
+
+    addCharacter(None, activeCharacter)
+
+
+
+def addCharacter(event, character):
+    charSelected = character
 
     for i in activeDataFrame.winfo_children():
         i.destroy()
@@ -867,7 +899,7 @@ def createCharList():
         nameLabel.grid(column=1, row=0)
 
         addButton = tk.Button(newCharFrame, text = "Add", font = ("Arial", 18))
-        addButton.bind("<Button-1>", lambda event, name = addButton.master.winfo_children()[1]["text"]: addCharacter(event = event, name = name))
+        addButton.bind("<Button-1>", lambda event, name = addButton.master.winfo_children()[1]["text"]: addCharacterToSimulated(event = event, name = name))
         addButton.grid(column=1, row=1)
         count += 1
 
@@ -898,6 +930,7 @@ createCharList()
 #SECTION B
 
 activeCharacter = None
+simulatedCharacters = []
 
 activeCharFrame = tk.Frame(mainWindow, height = 910, width = 600)
 activeCharFrame.grid(column=1, row=0)
