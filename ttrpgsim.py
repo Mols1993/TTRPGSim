@@ -455,12 +455,14 @@ def saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, 
     activeCharacter.savingThrows = saves
 
     addCharacter(None, activeCharacter)
+    print(simulatedCharacters)
     window.destroy()
 
-def editCharWindowParser(event):
+def editCharWindowParser(event, name):
     #This absolute unit of a line traverses the hierarchy tree from the "Edit" button to the character name in the activeDataFrame
-    charName = event.widget.master.master.winfo_children()[0].winfo_children()[1].winfo_children()[0]["text"]
-    editCharWindow(characterList[charName])
+    #charName = event.widget.master.master.winfo_children()[0].winfo_children()[1].winfo_children()[0]["text"]
+    #editCharWindow(characterList[charName])
+    print("This does nothing now")
 
 #PC
 #Hark Mamill
@@ -472,7 +474,8 @@ def editCharWindowParser(event):
 #int
 #con, int
 
-def editCharWindow(character):
+def editCharWindow(name):
+    character = activeCharacter
     root = Toplevel()
     root.title("Edit Stats")
 
@@ -792,7 +795,7 @@ def addCharacter(event, character):
     chaLabel = tk.Label(frame2, text = "CHA: " + str(charSelected.cha), font = ("Arial", 19), fg = colors["CHA"])
     profLabel = tk.Label(frame2, text = "Prof: " + str(charSelected.prof), font = ("Arial", 19), fg = "blue")
     editButton = tk.Button(frame2, text = "Edit", font = ("Arial", 19))
-    editButton.bind("<Button-1>", editCharWindowParser)
+    editButton.bind("<Button-1>", lambda event, name = charSelected.name: editCharWindow(name = name))
 
     strLabel.grid(row = 0, column = 0)
     dexLabel.grid(row = 0, column = 1)
