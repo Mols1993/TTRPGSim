@@ -171,6 +171,82 @@ for i in characterFiles:
 #print(characterList)
 #print("---------------------------------------------------------------------")
 
+mainWindow = tk.Tk()
+mainWindow.title("Tabletop Battle Sim")
+mainWindow.geometry("1600x910")
+
+#SECTION A
+
+flagPCfilter = False
+flagNPCfilter = False
+flagBOSSfilter = False
+
+charFrame = tk.Frame(mainWindow, height = 910, width = 300)
+charFrame.grid(column=0, row=0)
+charFrame.grid_propagate(0)
+
+charFilterFrame = tk.Frame(charFrame, bg="#B6B6B6", height = 150, width=300)
+charFilterFrame.grid(column=0, row=0, sticky="EW")
+
+charFilterFrame.columnconfigure(0, weight=1)
+
+charFilterButtonPC = tk.Button(charFilterFrame, text="PCs", font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
+charFilterButtonPC.grid(column=0, row=0, sticky="EW")
+
+charFilterButtonNPC = tk.Button(charFilterFrame, text="NPCs",font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
+charFilterButtonNPC.grid(column=0, row=1, sticky="EW")
+
+charFilterButtonBoss = tk.Button(charFilterFrame, text="Bosses",font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
+charFilterButtonBoss.grid(column=0, row=2, sticky="EW")
+
+
+
+#########################
+
+charListFrame = tk.Frame(charFrame, bg="#C40000", height = 760, width=300)
+charListFrame.grid(column=0, row=1)
+charListFrame.grid_propagate(0)
+
+charListScrollbar = tk.Scrollbar(charListFrame, orient="vertical")
+charListScrollbar.grid(column=1, row=0, sticky = "NS")
+
+charListCanvas = tk.Canvas(charListFrame, bg="#00C400", height = 760, width=279, scrollregion = (0,0,279,1000))
+charListCanvas.grid(column=0, row=0, sticky="EW")
+charListCanvas.grid_propagate(0)
+
+charListCanvas.configure(yscrollcommand = charListScrollbar.set)
+charListScrollbar.configure(command = charListCanvas.yview)
+
+charListMagicFrame = tk.Frame(charListCanvas, bg="#0000C4", height=1000, width=279)
+charListMagicFrame.grid(column=0, row=0)
+
+charListCanvas.create_window((0,0), window=charListMagicFrame, anchor="nw")
+
+activeCharFrame = tk.Frame(mainWindow, height = 910, width = 600)
+activeCharFrame.grid(column=1, row=0)
+activeCharFrame.grid_propagate(0)
+
+activeDataFrame = tk.Frame(activeCharFrame, bg = "blue", height = 300, width = 600)
+activeDataFrame.grid(column=0, row=0)
+activeDataFrame.grid_propagate(0)
+activeDataFrame.columnconfigure(0, weight=1)
+
+attackListFrame = tk.Frame(activeCharFrame, bg = "green", height = 400, width = 600)
+attackListFrame.grid(column=0, row=1)
+attackListFrame.grid_propagate(0)
+
+combatLogFrame = tk.Frame(activeCharFrame, bg = "#AC3BF6", height = 210, width = 600)
+combatLogFrame.grid(column=0, row=2)
+combatLogFrame.grid_propagate(0)
+
+otherCharsFrame = tk.Frame(mainWindow, bg="#EBF63B", height = 910, width = 400)
+otherCharsFrame.grid(column=2, row=0)
+otherCharsFrame.grid_propagate(0)
+
+turnsFrame = tk.Frame(mainWindow, bg="#11E9ff", height = 910, width = 300)
+turnsFrame.grid(column=3, row=0)
+turnsFrame.grid_propagate(0)
+
 def saveType1StatChanges(event, score, attackBonus, damageDice, damageBonus, crit, critDice, critBonus, character, action, window):
     score = score.get()
     attackBonus = int(attackBonus.get("@0, 0", tk.END).strip(" \n"))
@@ -902,58 +978,9 @@ def addCharacter(event, character):
     editButton.grid(row = 2, column = 2)
     
     createMoveList(activeCharacter)
+    createNeutralDefendersList(otherCharsFrame)
 
 
-mainWindow = tk.Tk()
-mainWindow.title("Tabletop Battle Sim")
-mainWindow.geometry("1600x910")
-
-#SECTION A
-
-flagPCfilter = False
-flagNPCfilter = False
-flagBOSSfilter = False
-
-charFrame = tk.Frame(mainWindow, height = 910, width = 300)
-charFrame.grid(column=0, row=0)
-charFrame.grid_propagate(0)
-
-charFilterFrame = tk.Frame(charFrame, bg="#B6B6B6", height = 150, width=300)
-charFilterFrame.grid(column=0, row=0, sticky="EW")
-
-charFilterFrame.columnconfigure(0, weight=1)
-
-charFilterButtonPC = tk.Button(charFilterFrame, text="PCs", font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
-charFilterButtonPC.grid(column=0, row=0, sticky="EW")
-
-charFilterButtonNPC = tk.Button(charFilterFrame, text="NPCs",font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
-charFilterButtonNPC.grid(column=0, row=1, sticky="EW")
-
-charFilterButtonBoss = tk.Button(charFilterFrame, text="Bosses",font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
-charFilterButtonBoss.grid(column=0, row=2, sticky="EW")
-
-
-
-#########################
-
-charListFrame = tk.Frame(charFrame, bg="#C40000", height = 760, width=300)
-charListFrame.grid(column=0, row=1)
-charListFrame.grid_propagate(0)
-
-charListScrollbar = tk.Scrollbar(charListFrame, orient="vertical")
-charListScrollbar.grid(column=1, row=0, sticky = "NS")
-
-charListCanvas = tk.Canvas(charListFrame, bg="#00C400", height = 760, width=279, scrollregion = (0,0,279,1000))
-charListCanvas.grid(column=0, row=0, sticky="EW")
-charListCanvas.grid_propagate(0)
-
-charListCanvas.configure(yscrollcommand = charListScrollbar.set)
-charListScrollbar.configure(command = charListCanvas.yview)
-
-charListMagicFrame = tk.Frame(charListCanvas, bg="#0000C4", height=1000, width=279)
-charListMagicFrame.grid(column=0, row=0)
-
-charListCanvas.create_window((0,0), window=charListMagicFrame, anchor="nw")
 
 ######################
 
@@ -1030,21 +1057,7 @@ createCharList()
 activeCharacter = None
 simulatedCharacters = []
 
-activeCharFrame = tk.Frame(mainWindow, height = 910, width = 600)
-activeCharFrame.grid(column=1, row=0)
-activeCharFrame.grid_propagate(0)
 
-activeDataFrame = tk.Frame(activeCharFrame, bg = "blue", height = 300, width = 600)
-activeDataFrame.grid(column=0, row=0)
-activeDataFrame.grid_propagate(0)
-activeDataFrame.columnconfigure(0, weight=1)
-
-
-#Section C
-
-attackListFrame = tk.Frame(activeCharFrame, bg = "green", height = 400, width = 600)
-attackListFrame.grid(column=0, row=1)
-attackListFrame.grid_propagate(0)
 
 
 def createMoveList(activeCharacter):
@@ -1112,7 +1125,7 @@ def createMoveList(activeCharacter):
             newEditButton.bind("<Button-1>", lambda event, name = action.name: editActionWindow(event = event, name = name))
             
             newActionFrame.columnconfigure(0, weight = 2)
-            newActionFrame.columnconfigure(1, weight = 1)
+            newActionFrame.columnconfigure(1, weight = 2)
             newActionFrame.columnconfigure(2, weight = 2)
             newActionFrame.columnconfigure(3, weight = 2)
             
@@ -1153,7 +1166,7 @@ def createMoveList(activeCharacter):
             newEditButton.bind("<Button-1>", lambda event, name = action.name: editActionWindow(event = event, name = name))
 
             newActionFrame.columnconfigure(0, weight = 2)
-            newActionFrame.columnconfigure(1, weight = 1)
+            newActionFrame.columnconfigure(1, weight = 2)
             newActionFrame.columnconfigure(2, weight = 2)
             newActionFrame.columnconfigure(3, weight = 2)
 
@@ -1163,17 +1176,112 @@ def createMoveList(activeCharacter):
 
 ############################
 
-combatLogFrame = tk.Frame(activeCharFrame, bg = "#AC3BF6", height = 210, width = 600)
-combatLogFrame.grid(column=0, row=2)
-combatLogFrame.grid_propagate(0)
 
-otherCharsFrame = tk.Frame(mainWindow, bg="#EBF63B", height = 910, width = 400)
-otherCharsFrame.grid(column=2, row=0)
-otherCharsFrame.grid_propagate(0)
 
-turnsFrame = tk.Frame(mainWindow, bg="#11E9ff", height = 910, width = 300)
-turnsFrame.grid(column=3, row=0)
-turnsFrame.grid_propagate(0)
+#Section D
+
+def createNeutralDefendersList(defendListFrame):
+    
+    for widget in otherCharsFrame.winfo_children():
+        widget.destroy()
+        
+    defendListScrollbar = tk.Scrollbar(defendListFrame, orient="vertical")
+    defendListScrollbar.grid(column=1, row=0, sticky = "NS")
+    
+    defendListCanvas = tk.Canvas(defendListFrame, bg="#00C400", height=910, width = 379, scrollregion = (0, 0, 379, 1000))
+    defendListCanvas.grid(column=0, row=0, sticky="EW")
+    defendListCanvas.grid_propagate(0)
+    
+    defendListCanvas.configure(yscrollcommand = defendListScrollbar.set)
+    defendListScrollbar.configure(command = defendListCanvas.yview)
+    
+    defendListMagicFrame = tk.Frame(defendListCanvas, bg="#0000C4", height=1000, width=379)
+    defendListMagicFrame.grid(column=0, row=0)
+    defendListMagicFrame.grid_propagate(0)
+    
+    defendListCanvas.create_window((0,0), window=defendListMagicFrame, anchor="nw")
+
+    if (len(simulatedCharacters) > 10):
+        defendListCanvas.configure(scrollregion = (0,0, 379, 100*(len(simulatedCharacters)-1)))
+        defendListMagicFrame.configure(height=100*(len(simulatedCharacters)-1))
+    
+    count = 0
+    for simchar in simulatedCharacters:
+        if(simchar == activeCharacter):
+            continue
+        defenderFrame = tk.Frame(defendListMagicFrame, height=100, width=379, relief = tk.GROOVE, borderwidth = 4)
+        defenderFrame.grid(column=0, row=count)
+        defenderFrame.grid_propagate(0)
+        defenderFrame.columnconfigure(0, weight = 0)
+        defenderFrame.columnconfigure(1, weight = 1)
+        
+        try:
+            portrait = PIL.Image.open("portraits/" + simchar.image)
+        except:
+            portrait = PIL.Image.open("portraits/default.png")
+            
+        portrait = portrait.resize((80,80), PIL.Image.ANTIALIAS)
+        TKportrait = PIL.ImageTk.PhotoImage(portrait)
+        
+        portraitLabel = tk.Label(defenderFrame, image = TKportrait)
+        portraitLabel.image = TKportrait
+        portraitLabel.grid(row=0, column = 0, padx = 4, pady=4)
+        
+        subFrame = tk.Frame(defenderFrame)
+        subFrame.grid(row=0, column= 1, sticky = "EWNS")
+        subFrame.grid_propagate(0)
+        subFrame.columnconfigure(0, weight = 1)
+        subFrame.rowconfigure(0, weight = 1)
+        subFrame.rowconfigure(1, weight = 1)
+        subFrame.rowconfigure(2, weight = 1)
+        
+        nameLabel = tk.Label(subFrame, text = simchar.name , font = ("Arial", 17))
+        nameLabel.grid(row=0, column=0, sticky = "ew")
+        
+        hpGreen = PIL.Image.open("images/hpGreen.png")
+        hpRed = PIL.Image.open("images/hpRed.png")
+        
+        hpWidth = (simchar.currentHP / simchar.hp) * 265
+        
+        hpGreen = hpGreen.resize((int(hpWidth + 1), 25), PIL.Image.ANTIALIAS)
+        hpGreen = PIL.ImageTk.PhotoImage(hpGreen)
+        
+        hpRed = hpRed.resize((int(265 - hpWidth + 1), 25), PIL.Image.ANTIALIAS)
+        hpRed = PIL.ImageTk.PhotoImage(hpRed)
+        
+        hpBarFrame = tk.Frame(subFrame, padx = 5)
+        hpBarFrame.grid(row = 1, column = 0)
+        
+        hpGreenLabel = tk.Label(hpBarFrame, image = hpGreen, bd = -2)
+        hpGreenLabel.image = hpGreen
+        if(hpGreen.width() > 1):
+            hpGreenLabel.grid(row = 0, column = 0)
+            
+        hpRedLabel = tk.Label(hpBarFrame, image = hpRed, bd = -2)
+        hpRedLabel.image = hpRed
+        if(hpRed.width() > 1):
+            hpRedLabel.grid(row = 0, column = 1)
+            
+        hpACFrame = tk.Frame(subFrame)
+        hpACFrame.grid(row = 2, column=0, columnspan = 2)
+        hpACFrame.columnconfigure(0, weight = 1)
+        hpACFrame.columnconfigure(1, weight = 1)
+        
+        hpLabel = tk.Label(hpACFrame, text = "HP: " + str(int(simchar.currentHP)) + "/" + str(simchar.hp), font = ("Arial", 14))
+        hpLabel.grid(row = 0, column = 0, sticky = "ew")
+        
+        acLabel = tk.Label(hpACFrame, text = "AC" + str(simchar.ac), font = ("Arial", 14))
+        acLabel.grid(row = 0, column = 1, sticky = "ew")
+        
+        count += 1
+
+
+
+    #hpLabel = tk.Label(frame1Sub2, text = "HP: " + str(int(charSelected.currentHP)) + "/" + str(charSelected.hp), font = ("Arial", 19))
+    #hpLabel.grid(row = 0, column = 0, sticky = "ew")
+
+    #acLabel = tk.Label(frame1Sub2, text = "AC: " + str(charSelected.ac), font = ("Arial", 19))
+    #acLabel.grid(row = 0, column = 1, sticky = "ew")
 
 
 
