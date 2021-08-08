@@ -120,6 +120,17 @@ def parseCharacter(name):
             action.damageBonus = int(f.readline().strip(" \n"))
             action.saveEffect = f.readline().strip(" \n").upper()
             character.actions.append(action)
+
+        elif(type == 3): #Spell with save
+            action.dcSave = f.readline().strip(" \n").upper()
+            action.dcScore = int(f.readline().strip(" \n"))
+            damageDice = f.readline().strip(" \n").split(", ")
+            action.damageDice = []
+            for i in damageDice:
+                action.damageDice.append(i)
+            action.damageBonus = int(f.readline().strip(" \n"))
+            action.saveEffect = f.readline().strip(" \n").upper()
+            character.actions.append(action)
         
         token = f.readline().strip(" \n")
     
@@ -418,6 +429,91 @@ def editActionWindow(event, name):
         #type = name = score = attackBonus = damageDice = damageBonus = crit = critDice = critBonus = dcSave = dcScore = saveEffect = hybrids = 0
         saveButton.bind(saveButton.bind("<Button-1>", lambda event = event, dcSave = dcSaveDropdown, dcScore = dcScoreInput, saveEffect = saveEffectInput, damageDice = damageDiceInput, damageBonus = damageBonusInput, character = activeCharacter.name, action = action.name, window = root: saveType2StatChanges(event, dcSave, dcScore, saveEffect, damageDice, damageBonus, character, action, window)))
 
+    elif action.type == 3:
+        frame0 = tk.Frame(mainFrame)
+        frame0.grid(row = 1, column = 0)
+        frame0.columnconfigure(0, weight = 1)
+        frame0.columnconfigure(1, weight = 1)
+        frame0.columnconfigure(2, weight = 1)
+        frame0.columnconfigure(3, weight = 1)
+
+        subFrame0_0 = tk.Frame(frame0)
+        subFrame0_0.grid(row = 0, column = 0, sticky = "ew")
+
+        dcSaveLabel = tk.Label(subFrame0_0, text = "Check DC:", font = ("Arial", 10))
+        dcSaveLabel.grid(row = 0, column = 0)
+
+        dcSaveDropdown = ttk.Combobox(subFrame0_0, values = ("STR", "DEX", "CON", "INT", "WIS", "CHA"), state = "readonly")
+        dcSaveDropdown.grid(row = 0, column = 1)
+        if action.dcSave == "STR":
+            dcSaveDropdown.current(0)
+        elif action.dcSave == "DEX":
+            dcSaveDropdown.current(1)
+        elif action.dcSave == "CON":
+            dcSaveDropdown.current(2)
+        elif action.dcSave == "INT":
+            dcSaveDropdown.current(3)
+        elif action.dcSave == "WIS":
+            dcSaveDropdown.current(4)
+        elif action.dcSave == "CHA":
+            dcSaveDropdown.current(5)
+
+        subFrame0_1 = tk.Frame(frame0)
+        subFrame0_1.grid(row = 0, column = 1, sticky = "ew")
+
+        dcScoreLabel = tk.Label(subFrame0_1, text = "Check Score:", font = ("Arial", 10))
+        dcScoreLabel.grid(row = 0, column = 0)
+
+        dcScoreInput = tk.Text(subFrame0_1, height = 1, width = 3)
+        dcScoreInput.grid(row = 0, column = 1)
+        dcScoreInput.insert(tk.INSERT, action.dcScore)
+
+        subFrame0_2 = tk.Frame(frame0)
+        subFrame0_2.grid(row = 0, column = 2, sticky = "ew")
+
+        saveEffectLabel = tk.Label(subFrame0_2, text = "Failed Effect:", font = ("Arial", 10))
+        saveEffectLabel.grid(row = 0, column = 0)
+
+        saveEffectInput = tk.Text(subFrame0_2, height = 1, width = 20)
+        saveEffectInput.grid(row = 0, column = 1)
+        saveEffectInput.insert(tk.INSERT, action.saveEffect)
+
+        frame1 = tk.Frame(mainFrame)
+        frame1.grid(row = 2, column = 0, sticky = "ew")
+        frame1.columnconfigure(0, weight = 1)
+        frame1.columnconfigure(2, weight = 1)
+
+        subFrame1_0 = tk.Frame(frame1)
+        subFrame1_0.grid(row = 0, column = 0, sticky = "ew")
+
+        damageDiceLabel = tk.Label(subFrame1_0, text = "Damage Dice:", font = ("Arial", 10))
+        damageDiceLabel.grid(row = 0, column = 0)
+
+        damageDiceText = ", ".join(action.damageDice)
+        damageDiceInput = tk.Text(subFrame1_0, height = 1, width = 20)
+        damageDiceInput.grid(row = 0, column = 1)
+        damageDiceInput.insert(tk.INSERT, damageDiceText)
+
+        subFrame1_1 = tk.Frame(frame1)
+        subFrame1_1.grid(row = 0, column = 1, sticky = "ew")
+
+        damageBonusLabel = tk.Label(subFrame1_1, text = "Damage Bonus:", font = ("Arial", 10))
+        damageBonusLabel.grid(row = 0, column = 0)
+
+        damageBonusInput = tk.Text(subFrame1_1, height = 1, width = 3)
+        damageBonusInput.grid(row = 0, column = 1)
+        damageBonusInput.insert(tk.INSERT, action.damageBonus)
+
+        frame2 = tk.Frame(mainFrame)
+        frame2.grid(row = 3, column = 0, sticky = "ew")
+        frame2.columnconfigure(0, weight = 1)
+
+        saveButton = tk.Button(frame2, text = "Save", font = ("Arial", 16))
+        saveButton.grid(row = 0, column = 0)
+
+        #type = name = score = attackBonus = damageDice = damageBonus = crit = critDice = critBonus = dcSave = dcScore = saveEffect = hybrids = 0
+        saveButton.bind(saveButton.bind("<Button-1>", lambda event = event, dcSave = dcSaveDropdown, dcScore = dcScoreInput, saveEffect = saveEffectInput, damageDice = damageDiceInput, damageBonus = damageBonusInput, character = activeCharacter.name, action = action.name, window = root: saveType2StatChanges(event, dcSave, dcScore, saveEffect, damageDice, damageBonus, character, action, window)))
+
 
 def saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, intt, wis, cha, prof, spellScore, initiative, saves, window):
 
@@ -455,7 +551,6 @@ def saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, 
     activeCharacter.savingThrows = saves
 
     addCharacter(None, activeCharacter)
-    print(simulatedCharacters)
     window.destroy()
 
 def editCharWindowParser(event, name):
@@ -1022,7 +1117,7 @@ def createMoveList(activeCharacter):
             newActionFrame.columnconfigure(3, weight = 2)
             
             count += 1
-        elif (action.type == 2):
+        elif (action.type == 2 or action.type == 3):
             newActionFrame = tk.Frame(attackListMagicFrame, height=100, width=579, relief = tk.GROOVE, borderwidth = 4)
             newActionFrame.grid(column=0, row=count)
             newActionFrame.grid_propagate(0)
@@ -1030,8 +1125,12 @@ def createMoveList(activeCharacter):
             newActionButton = tk.Button(newActionFrame, text = action.name, font = ("Arial", 18))
             newActionButton.grid(column=0, row=0, rowspan=2)
 
-            newTypeLabel = tk.Label(newActionFrame, text = action.dcSave+" save" , font = ("Arial", 15))
-            newTypeLabel.grid(column=1, row=0)
+            if(action.type == 2):
+                newTypeLabel = tk.Label(newActionFrame, text = action.dcSave+" save" , font = ("Arial", 15))
+                newTypeLabel.grid(column=1, row=0)
+            elif(action.type == 3):
+                newTypeLabel = tk.Label(newActionFrame, text = action.dcSave+" check" , font = ("Arial", 15))
+                newTypeLabel.grid(column=1, row=0)
 
             newDCLabel = tk.Label(newActionFrame, text = "DC: " + str(action.dcScore), font = ("Arial", 15))
             newDCLabel.grid(column=1, row=1)
@@ -1039,8 +1138,12 @@ def createMoveList(activeCharacter):
             newDamageLabel = tk.Label(newActionFrame, text= "Damage: "+createDiceString(action.damageDice)+"+"+str(action.damageBonus), font= ("Arial", 15))
             newDamageLabel.grid(column=2, row=0)
 
-            newSaveTypeLabel = tk.Label(newActionFrame, text= "Save type: "+action.saveEffect, font = ("Arial, 15"))
-            newSaveTypeLabel.grid(column=2, row=1)
+            if(action.type == 2):
+                newSaveTypeLabel = tk.Label(newActionFrame, text= "Save effect: "+action.saveEffect, font = ("Arial, 15"))
+                newSaveTypeLabel.grid(column=2, row=1)
+            elif(action.type == 3):
+                newSaveTypeLabel = tk.Label(newActionFrame, text= "Fail effect: "+action.saveEffect, font = ("Arial, 15"))
+                newSaveTypeLabel.grid(column=2, row=1)
 
             newAttackButton = tk.Button(newActionFrame, text = "Attack!", font = ("Arial", 15))
             newAttackButton.grid(column=3, row=0, sticky = "ew")
