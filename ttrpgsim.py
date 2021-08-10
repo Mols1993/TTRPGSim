@@ -873,6 +873,9 @@ def addCharacterToSimulated(event, name):
 
 
 def addCharacter(event, character):
+    global targetedCharacters
+    
+    targetedCharacters = []
     charSelected = character
 
     for i in activeDataFrame.winfo_children():
@@ -978,7 +981,7 @@ def addCharacter(event, character):
     editButton.grid(row = 2, column = 2)
     
     createMoveList(activeCharacter)
-    createNeutralDefendersList(otherCharsFrame)
+    createDefendersList(otherCharsFrame)
 
 
 
@@ -1056,8 +1059,123 @@ createCharList()
 
 activeCharacter = None
 simulatedCharacters = []
+selectedAttack = None
+selectedAttackAdvantage = "Normal"
+targetedCharacters = []
 
 
+def calculateHit(defendingCharacter):
+    
+    score = getScore(selectedAttack.score, activeCharacter)
+    partial = 20.0-defendingCharacter.ac+selectedAttack.attackBonus+getModifier(score)
+      
+    #if(selectedAttack.prof):
+    #    partial += activeCharacter.prof
+    
+    hit = partial/20.0
+    print(hit)
+    crit = calculateCrit()
+    if(hit < crit/100):
+        hit = crit
+    if(selectedAttackAdvantage == "Disadvantage"):
+        return hit*hit*100
+    elif(selectedAttackAdvantage == "Advantage"):
+        return (1-(1-hit)*(1-hit))*100
+    else:
+        return hit*100
+    
+    
+def calculateCrit():
+    crit = selectedAttack.crit * 0.05
+    if(selectedAttackAdvantage == "Disadvantage"):
+        return crit*crit*100
+    elif(selectedAttackAdvantage == "Advantage"):
+        return (1-(1-crit)*(1-crit))*100
+    else:
+        return crit*100
+    
+def calculateSave(defendingCharacter):
+    
+    score = getScore(selectedAttack.dcSave, defendingCharacter)
+    partial = 20.0-selectedAttack.dcScore+getModifier(score)
+    
+    if(selectedAttack.dcSave in defendingCharacter.savingThrows):
+        partial += defendingCharacter.prof
+        
+    save = partial/20.0
+    if(selectedAttackAdvantage == "Disadvantage"):
+        return save*save*100
+    elif(selectedAttackAdvantage == "Advantage"):
+        return (1-(1-save)*(1-save))*100
+    else:
+        return save*100
+        
+
+def getScore(score, character):
+    if(score == "STR"):
+        return character.str
+    elif(score == "DEX"):
+        return character.dex
+    elif(score == "CON"):
+        return character.con
+    elif(score == "INT"):
+        return character.intt
+    elif(score == "WIS"):
+        return character.wis
+    elif(score == "CHA"):
+        return character.cha
+
+def getModifier(score):
+    result = (score-10)/2
+    #print(int(result))
+    return int(result)
+
+
+def selectAttack(attack, event):
+    global  selectedAttack
+    if (selectedAttack != attack):
+        selectedAttack = attack
+        if(selectedAttack.type == 1):
+            state = event.widget.master.winfo_children()[4].get()
+            global selectedAttackAdvantage 
+            selectedAttackAdvantage = state
+            createDefendersList(otherCharsFrame)
+        else:
+            createDefendersList(otherCharsFrame)
+    else:
+        selectedAttack = None
+        createDefendersList(otherCharsFrame)
+        
+def targetChar(target, event):
+    global targetedCharacters
+    if target not in targetedCharacters:
+        targetedCharacters.append(target)
+        event.widget.configure(text = "Targeted", font = ("Arial", 14), bg = "#C40000")
+    
+    elif target in targetedCharacters:
+        targetedCharacters.remove(target)
+        event.widget.configure(text = "Not Targeted", font = ("Arial", 14), bg = "#f0f0f0")
+        
+def comboBoxType1Update(attack, event):
+    state = event.widget.get()
+    if(selectedAttack == attack):
+        global selectedAttackAdvantage
+        selectedAttackAdvantage = state
+        createDefendersList(otherCharsFrame)
+        
+def comboBoxType2Update(defender, event):
+    state = event.widget.get()
+    global selectedAttackAdvantage
+    selectedAttackAdvantage = state
+    save = calculateSave(defender)
+    event.widget.master.winfo_children()[1].configure(text = str(round(save, 2)) + "% to pass Save", font = ("Arial", 14))
+
+def comboBoxType3Update(defender, event):
+    state = event.widget.get()
+    global selectedAttackAdvantage
+    selectedAttackAdvantage = state
+    save = calculateSave(defender)
+    event.widget.master.winfo_children()[1].configure(text = str(round(save, 2)) + "% to pass Check", font = ("Arial", 14))
 
 
 def createMoveList(activeCharacter):
@@ -1097,6 +1215,7 @@ def createMoveList(activeCharacter):
             newActionFrame.grid_propagate(0)
             
             newActionButton = tk.Button(newActionFrame, text = action.name, font = ("Arial", 18))
+            newActionButton.bind("<Button-1>", lambda event, name = action: selectAttack(attack = name, event = event))
             newActionButton.grid(column=0, row=0, rowspan=2)
             
             if(action.attackBonus >= 0):
@@ -1116,6 +1235,7 @@ def createMoveList(activeCharacter):
             newCombobox["values"] = ("Normal", "Advantage", "Disadvantage")
             newCombobox.current(0)
             newCombobox["state"] = "readonly"
+            newCombobox.bind('<<ComboboxSelected>>', lambda event, name = action: comboBoxType1Update(attack = name, event = event))
             
             newAttackButton = tk.Button(newActionFrame, text = "Attack!", font = ("Arial", 15))
             newAttackButton.grid(column=3, row=0, sticky = "ew")
@@ -1136,6 +1256,7 @@ def createMoveList(activeCharacter):
             newActionFrame.grid_propagate(0)
 
             newActionButton = tk.Button(newActionFrame, text = action.name, font = ("Arial", 18))
+            newActionButton.bind("<Button-1>", lambda event, name = action: selectAttack(attack = name, event = event))
             newActionButton.grid(column=0, row=0, rowspan=2)
 
             if(action.type == 2):
@@ -1179,110 +1300,172 @@ def createMoveList(activeCharacter):
 
 
 #Section D
-
-def createNeutralDefendersList(defendListFrame):
-    
+def createDefendersList(defendListFrame):
     for widget in otherCharsFrame.winfo_children():
         widget.destroy()
-        
+
     defendListScrollbar = tk.Scrollbar(defendListFrame, orient="vertical")
     defendListScrollbar.grid(column=1, row=0, sticky = "NS")
-    
-    defendListCanvas = tk.Canvas(defendListFrame, bg="#00C400", height=910, width = 379, scrollregion = (0, 0, 379, 1000))
+
+    defendListCanvas = tk.Canvas(defendListFrame, bg="#00C400", height=910, width = 379, scrollregion = (0, 0, 379, 910))
     defendListCanvas.grid(column=0, row=0, sticky="EW")
     defendListCanvas.grid_propagate(0)
-    
+
     defendListCanvas.configure(yscrollcommand = defendListScrollbar.set)
     defendListScrollbar.configure(command = defendListCanvas.yview)
-    
-    defendListMagicFrame = tk.Frame(defendListCanvas, bg="#0000C4", height=1000, width=379)
+
+    defendListMagicFrame = tk.Frame(defendListCanvas, bg="#0000C4", height=910, width=379)
     defendListMagicFrame.grid(column=0, row=0)
     defendListMagicFrame.grid_propagate(0)
-    
-    defendListCanvas.create_window((0,0), window=defendListMagicFrame, anchor="nw")
 
-    if (len(simulatedCharacters) > 10):
-        defendListCanvas.configure(scrollregion = (0,0, 379, 100*(len(simulatedCharacters)-1)))
-        defendListMagicFrame.configure(height=100*(len(simulatedCharacters)-1))
+    defendListCanvas.create_window((0,0), window=defendListMagicFrame, anchor="nw")
     
+    if(selectedAttack is None):
+        frameHeight = 100
+        if(len(simulatedCharacters) > 10):
+            defendListCanvas.configure(scrollregion = (0,0, 379, 100*(len(simulatedCharacters)-1)))
+            defendListMagicFrame.configure(height=100*(len(simulatedCharacters)-1))
+    else:
+        frameHeight = 180
+        if(len(simulatedCharacters) > 6):
+            defendListCanvas.configure(scrollregion = (0,0, 379, 180*(len(simulatedCharacters)-1)))
+            defendListMagicFrame.configure(height=180*(len(simulatedCharacters)-1))
+
     count = 0
     for simchar in simulatedCharacters:
         if(simchar == activeCharacter):
             continue
-        defenderFrame = tk.Frame(defendListMagicFrame, height=100, width=379, relief = tk.GROOVE, borderwidth = 4)
+        defenderFrame = tk.Frame(defendListMagicFrame, height=frameHeight, width=379, relief = tk.GROOVE, borderwidth = 4)
         defenderFrame.grid(column=0, row=count)
         defenderFrame.grid_propagate(0)
-        defenderFrame.columnconfigure(0, weight = 0)
-        defenderFrame.columnconfigure(1, weight = 1)
-        
+
+        statFrame = tk.Frame(defenderFrame, height = 100, width = 379)
+        statFrame.grid(column=0, row=0)
+        statFrame.grid_propagate(0)
+        statFrame.columnconfigure(0, weight = 0)
+        statFrame.columnconfigure(1, weight = 1)
+
         try:
             portrait = PIL.Image.open("portraits/" + simchar.image)
         except:
             portrait = PIL.Image.open("portraits/default.png")
-            
+
         portrait = portrait.resize((80,80), PIL.Image.ANTIALIAS)
         TKportrait = PIL.ImageTk.PhotoImage(portrait)
-        
-        portraitLabel = tk.Label(defenderFrame, image = TKportrait)
+
+        portraitLabel = tk.Label(statFrame, image = TKportrait)
         portraitLabel.image = TKportrait
         portraitLabel.grid(row=0, column = 0, padx = 4, pady=4)
-        
-        subFrame = tk.Frame(defenderFrame)
+
+        subFrame = tk.Frame(statFrame)
         subFrame.grid(row=0, column= 1, sticky = "EWNS")
         subFrame.grid_propagate(0)
         subFrame.columnconfigure(0, weight = 1)
         subFrame.rowconfigure(0, weight = 1)
         subFrame.rowconfigure(1, weight = 1)
         subFrame.rowconfigure(2, weight = 1)
-        
+
         nameLabel = tk.Label(subFrame, text = simchar.name , font = ("Arial", 17))
         nameLabel.grid(row=0, column=0, sticky = "ew")
-        
+
         hpGreen = PIL.Image.open("images/hpGreen.png")
         hpRed = PIL.Image.open("images/hpRed.png")
-        
+
         hpWidth = (simchar.currentHP / simchar.hp) * 265
-        
+
         hpGreen = hpGreen.resize((int(hpWidth + 1), 25), PIL.Image.ANTIALIAS)
         hpGreen = PIL.ImageTk.PhotoImage(hpGreen)
-        
+
         hpRed = hpRed.resize((int(265 - hpWidth + 1), 25), PIL.Image.ANTIALIAS)
         hpRed = PIL.ImageTk.PhotoImage(hpRed)
-        
+
         hpBarFrame = tk.Frame(subFrame, padx = 5)
         hpBarFrame.grid(row = 1, column = 0)
-        
+
         hpGreenLabel = tk.Label(hpBarFrame, image = hpGreen, bd = -2)
         hpGreenLabel.image = hpGreen
         if(hpGreen.width() > 1):
             hpGreenLabel.grid(row = 0, column = 0)
-            
+
         hpRedLabel = tk.Label(hpBarFrame, image = hpRed, bd = -2)
         hpRedLabel.image = hpRed
         if(hpRed.width() > 1):
             hpRedLabel.grid(row = 0, column = 1)
-            
+
         hpACFrame = tk.Frame(subFrame)
         hpACFrame.grid(row = 2, column=0, columnspan = 2)
         hpACFrame.columnconfigure(0, weight = 1)
         hpACFrame.columnconfigure(1, weight = 1)
-        
+
         hpLabel = tk.Label(hpACFrame, text = "HP: " + str(int(simchar.currentHP)) + "/" + str(simchar.hp), font = ("Arial", 14))
         hpLabel.grid(row = 0, column = 0, sticky = "ew")
-        
+
         acLabel = tk.Label(hpACFrame, text = "AC" + str(simchar.ac), font = ("Arial", 14))
         acLabel.grid(row = 0, column = 1, sticky = "ew")
         
+        if(selectedAttack is not None):
+
+            probabilityFrame = tk.Frame(defenderFrame, height = 40, width = 379)
+            probabilityFrame.grid(row=1, column=0)
+            probabilityFrame.grid_propagate(0)
+            probabilityFrame.columnconfigure(0, weight = 2)
+            probabilityFrame.columnconfigure(1, weight = 1)
+
+            if(selectedAttack.type == 1):
+
+                hit = calculateHit(simchar)
+                #print(hit)
+                hitLabel = tk.Label(probabilityFrame, text = str(round(hit, 2)) + "% Hit", font = ("Arial", 20))
+                hitLabel.grid(row=0, column=0, rowspan=2)
+
+                crit = calculateCrit()
+                critLabel = tk.Label(probabilityFrame, text = str(round(crit, 2)) + "% Crit", font = ("Arial", 14))
+                critLabel.grid(row=1, column=1)
+
+            if(selectedAttack.type == 2):
+    
+                rollCombobox = ttk.Combobox(probabilityFrame)
+                rollCombobox.grid(row = 0, column = 0)
+                rollCombobox["values"] = ("Normal", "Advantage", "Disadvantage")
+                rollCombobox.current(0)
+                rollCombobox["state"] = "readonly"
+                rollCombobox.bind('<<ComboboxSelected>>', lambda event, name = simchar: comboBoxType2Update(defender = name, event = event))
+    
+                save = calculateSave(simchar)
+                saveLabel = tk.Label(probabilityFrame, text = str(round(save, 2)) + "% to pass Save", font = ("Arial", 14))
+                saveLabel.grid(row = 0, column=1)
+    
+            if(selectedAttack.type == 3):
+                rollCombobox = ttk.Combobox(probabilityFrame)
+                rollCombobox.grid(row = 0, column = 0)
+                rollCombobox["values"] = ("Normal", "Advantage", "Disadvantage")
+                rollCombobox.current(0)
+                rollCombobox["state"] = "readonly"
+                rollCombobox.bind('<<ComboboxSelected>>', lambda event, name = activeCharacter: comboBoxType3Update(defender = name, event = event))
+    
+                save = calculateSave(activeCharacter)
+                saveLabel = tk.Label(probabilityFrame, text = str(round(save, 2)) + "% to pass Check", font = ("Arial", 14))
+                saveLabel.grid(row = 0, column=1)
+    
+    
+            buttonFrame = tk.Frame(defenderFrame, height = 40, width = 379)
+            buttonFrame.grid(row=2, column=0)
+            buttonFrame.grid_propagate(0)
+            buttonFrame.columnconfigure(0, weight = 1)
+            buttonFrame.columnconfigure(1, weight = 1)
+    
+            targetButton = tk.Button(buttonFrame)
+            if(simchar in targetedCharacters):
+                targetButton.configure(text = "Targeted", font = ("Arial", 14), bg = "#C40000")
+            else:
+                targetButton.configure(text = "Not Targeted", font = ("Arial", 14))
+            targetButton.grid(row = 0, column = 0, sticky = "NEWS")
+            targetButton.bind("<Button-1>", lambda event, name = simchar: targetChar(name, event))
+    
+            editButton = tk.Button(buttonFrame, text = "Edit", font = ("Arial", 14))
+            editButton.grid(row = 0, column = 1, sticky = "NEWS")
+            #editButton.bind("<Button-1", lambda event, name = simchar: editCharWindow(name))
+
         count += 1
-
-
-
-    #hpLabel = tk.Label(frame1Sub2, text = "HP: " + str(int(charSelected.currentHP)) + "/" + str(charSelected.hp), font = ("Arial", 19))
-    #hpLabel.grid(row = 0, column = 0, sticky = "ew")
-
-    #acLabel = tk.Label(frame1Sub2, text = "AC: " + str(charSelected.ac), font = ("Arial", 19))
-    #acLabel.grid(row = 0, column = 1, sticky = "ew")
-
-
 
 mainWindow.mainloop()
