@@ -3,16 +3,44 @@ from tkinter import Toplevel, ttk
 import PIL.Image
 from PIL.Image import init
 import math, re, random, copy, PIL.ImageTk, os
+import inspect
 
 class Character:
-    type = name = image = hp = ac = prof = savingThrows = actions = currentHP = initiative = 0
-    scores = {}
+    #type = name = image = hp = ac = prof = savingThrows = actions = currentHP = initiative = 0
 
-    def __repr__(self):#Entonces
+    def __init__(self):#Entonces
+        self.scores = {}
+        self.type = 0
+        self.name = ""
+        self.image = ""
+        self.hp = 0
+        self.ac = 0
+        self.prof = 0
+        self.savingThrows = []
+        self.actions = []
+        self.currentHP = 0
+        self.initiative = 0
+
+    def __repr__(self):
         return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Image: " + str(self.image) + "\n" + "HP: " + str(self.hp) + "\n" + "Current HP: " + str(self.currentHP) + "\n" + "AC: " + str(self.ac) + "\n" + "Initiative: " + str(self.initiative) + "\n" + "STR: " + str(self.scores["STR"]) + "\n" + "DEX: " + str(self.scores["DEX"]) + "\n" + "CON: " + str(self.scores["CON"]) + "\n" + "INT: " + str(self.scores["INT"]) + "\n" + "WIS: " + str(self.scores["WIS"]) + "\n" + "CHA: " + str(self.scores["CHA"]) + "\n" + "Proficiency Bonus: " + str(self.prof) + "\n" + "Saving Throws: " + str(self.savingThrows) + "\n" + "Actions: " + str(self.actions) + "\n"
 
 class Action:
-    type = name = score = attackBonus = damageDice = damageBonus = crit = critDice = critBonus = dcSave = dcScore = saveEffect = hybrids = prof = 0
+    #type = name = score = attackBonus = damageDice = damageBonus = crit = critDice = critBonus = dcSave = dcScore = saveEffect = hybrids = prof = 0
+
+    def __init__(self):
+        self.type = 0
+        self.name = ""
+        self.score = ""
+        self.attackBonus = 0
+        self.damageDice = []
+        self.damageBonus = 0
+        self.crit = 0
+        self.critDice = []
+        self.dcSave = ""
+        self.dcScore = 0
+        self.saveEffect = ""
+        self.hybrids = []
+        self.prof = False
 
     def __repr__(self):
         if(self.type == 1):
@@ -792,6 +820,7 @@ def addCharacterToSimulated(event, name):
     global activeCharacter
 
     character = copy.deepcopy(characterList[name])
+    print(character)
     n = character.name + " 1"
     c = 2
 
@@ -1132,7 +1161,8 @@ def comboBoxType2Update(defender, event):
         except ValueError:
             pos = -1
 
-    targetedCharacters[pos] = [targetedCharacters[pos][0], state]
+    if(pos != -1):
+        targetedCharacters[pos] = [targetedCharacters[pos][0], state]
 
     global selectedAttackAdvantage
     selectedAttackAdvantage = state
