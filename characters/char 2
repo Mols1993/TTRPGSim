@@ -6,7 +6,6 @@ image2.png
 15
 17, 18, 17, 20, 19, 22
 6
-cha
 cha, wis
 *
 2
@@ -19,6 +18,7 @@ half
 *
 1
 fire bolt
+false
 int
 0
 1d10

@@ -1,21 +1,18 @@
 ﻿import tkinter as tk
 from tkinter import Toplevel, ttk
-import math
-import random
-import copy
 import PIL.Image
 from PIL.Image import init
-import PIL.ImageTk
-import os
+import math, re, random, copy, PIL.ImageTk, os
 
 class Character:
-    type = name = image = hp = ac = str = dex = con = intt = wis = cha = prof = spellScore = savingThrows = actions = currentHP = initiative = 0
+    type = name = image = hp = ac = prof = savingThrows = actions = currentHP = initiative = 0
+    scores = {}
 
-    def __repr__(self):
-        return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Image: " + str(self.image) + "\n" + "HP: " + str(self.hp) + "\n" + "Current HP: " + str(self.currentHP) + "\n" + "AC: " + str(self.ac) + "\n" + "Initiative: " + str(self.initiative) + "\n" + "STR: " + str(self.str) + "\n" + "DEX: " + str(self.dex) + "\n" + "CON: " + str(self.con) + "\n" + "INT: " + str(self.intt) + "\n" + "WIS: " + str(self.wis) + "\n" + "CHA: " + str(self.cha) + "\n" + "Proficiency Bonus: " + str(self.prof) + "\n" + "Spell Ability: " + str(self.spellScore) + "\n" + "Saving Throws: " + str(self.savingThrows) + "\n" + "Actions: " + str(self.actions) + "\n"
+    def __repr__(self):#Entonces
+        return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Image: " + str(self.image) + "\n" + "HP: " + str(self.hp) + "\n" + "Current HP: " + str(self.currentHP) + "\n" + "AC: " + str(self.ac) + "\n" + "Initiative: " + str(self.initiative) + "\n" + "STR: " + str(self.scores["STR"]) + "\n" + "DEX: " + str(self.scores["DEX"]) + "\n" + "CON: " + str(self.scores["CON"]) + "\n" + "INT: " + str(self.scores["INT"]) + "\n" + "WIS: " + str(self.scores["WIS"]) + "\n" + "CHA: " + str(self.scores["CHA"]) + "\n" + "Proficiency Bonus: " + str(self.prof) + "\n" + "Saving Throws: " + str(self.savingThrows) + "\n" + "Actions: " + str(self.actions) + "\n"
 
 class Action:
-    type = name = score = attackBonus = damageDice = damageBonus = crit = critDice = critBonus = dcSave = dcScore = saveEffect = hybrids = 0
+    type = name = score = attackBonus = damageDice = damageBonus = crit = critDice = critBonus = dcSave = dcScore = saveEffect = hybrids = prof = 0
 
     def __repr__(self):
         if(self.type == 1):
@@ -24,46 +21,6 @@ class Action:
             return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Save DC: " + str(self.dcSave) + "\n" + "Damage Dice: " + str(self.damageDice) + "\n" + "Damage Bonus: " + str(self.damageBonus) + "\n" + "Save Effect: " + self.saveEffect + "\n"
         elif(self.type == 3):
             return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Hybrids: " + str(self.hybrids) + "\n"
-
-#def parseAction(name):
-#    f = open("actions/" + name, "r")
-#    action = Action()
-#    type = int(f.readline().strip(" \n"))
-#    action.type = type
-#    action.name = f.readline().strip(" \n")
-#    if(type == 1): #Attack
-#        action.score = f.readline().strip(" \n")
-#        action.attackBonus = int(f.readline().strip(" \n"))
-#        damageDice = f.readline().strip(" \n").split(", ")
-#        action.damageDice = []
-#        for i in damageDice:
-#            action.damageDice.append(i)
-#        action.damageBonus = int(f.readline().strip(" \n"))
-#        action.crit = int(f.readline().strip(" \n"))
-#        damageDice = f.readline().strip(" \n").split(", ")
-#        action.critDice = []
-#        for i in damageDice:
-#            action.critDice.append(i)
-#        action.critBonus = int(f.readline().strip(" \n"))
-#        actionList[name] = action
-#
-#    elif(type == 2): #Spell with save
-#        action.dcSave = f.readline().strip(" \n")
-#        damageDice = f.readline().strip(" \n").split(", ")
-#        action.damageDice = []
-#        for i in damageDice:
-#            action.damageDice.append(i)
-#        action.damageBonus = int(f.readline().strip(" \n"))
-#        action.saveEffect = f.readline().strip(" \n")
-#        actionList[name] = action
-#
-#    elif(type == 3): #Combined attack + save
-#        action.hybrids = []
-#        x = f.readline().strip(" \n")
-#        while x:
-#            action.hybrids.append(x)
-#            x = f.readline().strip(" \n")
-#        actionList[name] = action
 
 def parseCharacter(name):
     f = open("characters/" + name, "r")
@@ -76,14 +33,13 @@ def parseCharacter(name):
     character.ac = int(f.readline().strip(" \n"))
     character.initiative = int(f.readline().strip(" \n"))
     scores = f.readline().strip(" \n").split(", ")
-    character.str = int(scores[0])
-    character.dex = int(scores[1])
-    character.con = int(scores[2])
-    character.intt = int(scores[3])
-    character.wis = int(scores[4])
-    character.cha = int(scores[5])
+    character.scores["STR"] = int(scores[0])
+    character.scores["DEX"] = int(scores[1])
+    character.scores["CON"] = int(scores[2])
+    character.scores["INT"] = int(scores[3])
+    character.scores["WIS"] = int(scores[4])
+    character.scores["CHA"] = int(scores[5])
     character.prof = int(f.readline().strip(" \n"))
-    character.spellScore = f.readline().strip(" \n").upper()
     character.savingThrows = f.readline().strip(" \n").upper().split(", ")
     character.actions = []
 
@@ -95,6 +51,10 @@ def parseCharacter(name):
         action.type = type
         action.name = f.readline().strip(" \n")
         if(type == 1): #Attack
+            p = f.readline().strip(" \n").upper()
+            action.prof = True
+            if(p == "FALSE"):
+                action.prof = False
             action.score = f.readline().strip(" \n").upper()
             action.attackBonus = int(f.readline().strip(" \n"))
             damageDice = f.readline().strip(" \n").split(", ")
@@ -106,7 +66,7 @@ def parseCharacter(name):
             damageDice = f.readline().strip(" \n").split(", ")
             action.critDice = []
             for i in damageDice:
-                action.critDice.append(i)
+                action.critDice.append(i)#Nice
             action.critBonus = int(f.readline().strip(" \n"))
             character.actions.append(action)
 
@@ -142,22 +102,6 @@ def createDiceString(diceList):
     for dice in diceList:
         out += dice+"+"
     return out[:-1]
-        
-
-#actionFiles = os.listdir(path="actions")
-#actionList = {}
-
-#Parse all actions
-#for i in actionFiles:
-#    parseAction(i)
-
-#Make hybrid actions actually reference the component action objects, we have to do that now since they weren't initialized before
-#for i in actionList:
-#    if(actionList[i].type == 3):
-#        aux = actionList[i].hybrids
-#        actionList[i].hybrids = []
-#        for j in aux:
-#            actionList[i].hybrids.append(actionList[j])
 
 #print(actionList)
 #print("---------------------------------------------------------------------")
@@ -247,7 +191,7 @@ turnsFrame = tk.Frame(mainWindow, bg="#11E9ff", height = 910, width = 300)
 turnsFrame.grid(column=3, row=0)
 turnsFrame.grid_propagate(0)
 
-def saveType1StatChanges(event, score, attackBonus, damageDice, damageBonus, crit, critDice, critBonus, character, action, window):
+def saveType1StatChanges(event, score, attackBonus, damageDice, damageBonus, crit, critDice, critBonus, prof, character, action, window):
     score = score.get()
     attackBonus = int(attackBonus.get("@0, 0", tk.END).strip(" \n"))
     damageDice = damageDice.get("@0, 0", tk.END).strip(" \n").split(", ")
@@ -255,6 +199,11 @@ def saveType1StatChanges(event, score, attackBonus, damageDice, damageBonus, cri
     crit = int(crit.get("@0, 0", tk.END).strip(" \n"))
     critDice = critDice.get("@0, 0", tk.END).strip(" \n").split(", ")
     critBonus = int(critBonus.get("@0, 0", tk.END).strip(" \n"))
+    prof = prof.get()
+    if(prof):
+        prof = True
+    else:
+        prof = False
 
     act = None
 
@@ -269,8 +218,10 @@ def saveType1StatChanges(event, score, attackBonus, damageDice, damageBonus, cri
     act.crit = crit
     act.critDice = critDice
     act.critBonus = critBonus
+    act.prof = prof
 
     createMoveList(activeCharacter)
+    createDefendersList()
 
     window.destroy()
 
@@ -294,6 +245,7 @@ def saveType2StatChanges(event, dcSave, dcScore, saveEffect, damageDice, damageB
     act.damageBonus = damageBonus
 
     createMoveList(activeCharacter)
+    createDefendersList()
 
     window.destroy()
 
@@ -410,6 +362,20 @@ def editActionWindow(event, name):
         critBonusInput.grid(row = 0, column = 1)
         critBonusInput.insert(tk.INSERT, action.critBonus)
 
+        subFrame1_3 = tk.Frame(frame1)
+        subFrame1_3.grid(row = 0, column = 3, sticky = "ew")
+
+        profLabel = tk.Label(subFrame1_3, text = "Proficient:", font = ("Arial", 10))
+        profLabel.grid(row = 0, column = 0)
+
+        v = tk.IntVar()
+        profCheck = ttk.Checkbutton(subFrame1_3, variable = v)
+        profCheck.grid(row = 0, column = 1)
+        if(action.prof):
+            v.set(1)
+        else:
+            v.set(0)
+
         frame2 = tk.Frame(mainFrame)
         frame2.grid(row = 3, column = 0, sticky = "ew")
         frame2.columnconfigure(0, weight = 1)
@@ -418,7 +384,7 @@ def editActionWindow(event, name):
         saveButton.grid(row = 0, column = 0)
 
         #type = name = score = attackBonus = damageDice = damageBonus = crit = critDice = critBonus = dcSave = saveEffect = hybrids = 0
-        saveButton.bind(saveButton.bind("<Button-1>", lambda event = event, score = attackScoreDropdown, attackBonus = attackBonusInput, damageDice = damageDiceInput, damageBonus = damageBonusInput, crit = critRangeInput, critDice = critDiceInput, critBonus = critBonusInput, character = activeCharacter.name, action = action.name, window = root: saveType1StatChanges(event, score, attackBonus, damageDice, damageBonus, crit, critDice, critBonus, character, action, window)))
+        saveButton.bind(saveButton.bind("<Button-1>", lambda event = event, score = attackScoreDropdown, attackBonus = attackBonusInput, damageDice = damageDiceInput, damageBonus = damageBonusInput, crit = critRangeInput, critDice = critDiceInput, critBonus = critBonusInput, prof = v, character = activeCharacter.name, action = action.name, window = root: saveType1StatChanges(event, score, attackBonus, damageDice, damageBonus, crit, critDice, critBonus, prof, character, action, window)))
 
     elif action.type == 2:
         frame0 = tk.Frame(mainFrame)
@@ -591,7 +557,7 @@ def editActionWindow(event, name):
         saveButton.bind(saveButton.bind("<Button-1>", lambda event = event, dcSave = dcSaveDropdown, dcScore = dcScoreInput, saveEffect = saveEffectInput, damageDice = damageDiceInput, damageBonus = damageBonusInput, character = activeCharacter.name, action = action.name, window = root: saveType2StatChanges(event, dcSave, dcScore, saveEffect, damageDice, damageBonus, character, action, window)))
 
 
-def saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, intt, wis, cha, prof, spellScore, initiative, saves, window):
+def saveCharStatChanges(event, char, type, currentHP, maxHP, ac, str, dex, con, intt, wis, cha, prof, initiative, saves, window):
 
     type = type.get()
     currentHP = int(currentHP.get("@0, 0", tk.END).strip(" \n"))
@@ -604,29 +570,28 @@ def saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, 
     wis = int(wis.get("@0, 0", tk.END).strip(" \n"))
     cha = int(cha.get("@0, 0", tk.END).strip(" \n"))
     prof = int(prof.get("@0, 0", tk.END).strip(" \n"))
-    spellScore = spellScore.get().upper()
     initiative = int(initiative.get("@0, 0", tk.END).strip(" \n"))
     saves = saves.get("@0, 0", tk.END).strip(" \n").upper().split(", ")
 
     #type = name = image = hp = ac = str = dex = con = intt = wis = cha = prof = spellScore = savingThrows = actions = currentHP = 0
 
 
-    activeCharacter.type = type
-    activeCharacter.currentHP = currentHP
-    activeCharacter.hp = maxHP
-    activeCharacter.ac = ac
-    activeCharacter.str = str
-    activeCharacter.dex = dex
-    activeCharacter.con = con
-    activeCharacter.intt = intt
-    activeCharacter.wis = wis
-    activeCharacter.cha = cha
-    activeCharacter.prof = prof
-    activeCharacter.spellScore = spellScore
-    activeCharacter.initiative = initiative
-    activeCharacter.savingThrows = saves
+    char.type = type
+    char.currentHP = currentHP
+    char.hp = maxHP
+    char.ac = ac
+    char.scores["STR"] = str
+    char.scores["DEX"] = dex
+    char.scores["CON"] = con
+    char.scores["INT"] = intt
+    char.scores["WIS"] = wis
+    char.scores["CHA"] = cha
+    char.prof = prof
+    char.initiative = initiative
+    char.savingThrows = saves
 
-    addCharacter(None, activeCharacter)
+    setActiveCharFrame(None, activeCharacter)
+    createDefendersList()
     window.destroy()
 
 def editCharWindowParser(event, name):
@@ -635,18 +600,8 @@ def editCharWindowParser(event, name):
     #editCharWindow(characterList[charName])
     print("This does nothing now")
 
-#PC
-#Hark Mamill
-#image.png
-#52
-#17
-#15, 16, 17, 18, 19, 20
-#4
-#int
-#con, int
-
-def editCharWindow(name):
-    character = activeCharacter
+def editCharWindow(char):
+    character = char
     root = Toplevel()
     root.title("Edit Stats")
 
@@ -725,7 +680,7 @@ def editCharWindow(name):
 
     strInput = tk.Text(subFrame2_0, height = 1, width = 3)
     strInput.grid(row = 0, column = 1)
-    strInput.insert(tk.INSERT, character.str)
+    strInput.insert(tk.INSERT, character.scores["STR"])
 
     subFrame1_1 = tk.Frame(frame1)
     subFrame1_1.grid(row = 0, column = 1, sticky = "ew")
@@ -735,7 +690,7 @@ def editCharWindow(name):
 
     dexInput = tk.Text(subFrame1_1, height = 1, width = 3)
     dexInput.grid(row = 0, column = 1)
-    dexInput.insert(tk.INSERT, character.dex)
+    dexInput.insert(tk.INSERT, character.scores["DEX"])
 
     subFrame1_2 = tk.Frame(frame1)
     subFrame1_2.grid(row = 0, column = 2, sticky = "ew")
@@ -745,7 +700,7 @@ def editCharWindow(name):
 
     conInput = tk.Text(subFrame1_2, height = 1, width = 3)
     conInput.grid(row = 0, column = 1)
-    conInput.insert(tk.INSERT, character.con)
+    conInput.insert(tk.INSERT, character.scores["CON"])
 
     subFrame1_3 = tk.Frame(frame1)
     subFrame1_3.grid(row = 0, column = 3, sticky = "ew")
@@ -755,7 +710,7 @@ def editCharWindow(name):
 
     intInput = tk.Text(subFrame1_3, height = 1, width = 3)
     intInput.grid(row = 0, column = 1)
-    intInput.insert(tk.INSERT, character.intt)
+    intInput.insert(tk.INSERT, character.scores["INT"])
 
     subFrame1_4 = tk.Frame(frame1)
     subFrame1_4.grid(row = 0, column = 4, sticky = "ew")
@@ -765,7 +720,7 @@ def editCharWindow(name):
 
     wisInput = tk.Text(subFrame1_4, height = 1, width = 3)
     wisInput.grid(row = 0, column = 1)
-    wisInput.insert(tk.INSERT, character.wis)
+    wisInput.insert(tk.INSERT, character.scores["WIS"])
 
     subFrame1_5 = tk.Frame(frame1)
     subFrame1_5.grid(row = 0, column = 5, sticky = "ew")
@@ -775,9 +730,9 @@ def editCharWindow(name):
 
     chaInput = tk.Text(subFrame1_5, height = 1, width = 3)
     chaInput.grid(row = 0, column = 1)
-    chaInput.insert(tk.INSERT, character.cha)
+    chaInput.insert(tk.INSERT, character.scores["CHA"])
 
-    #frame2 contains proficiency, spell score and saves stats
+    #frame2 contains proficiency and saves stats
     frame2 = tk.Frame(mainFrame)
     frame2.grid(row = 3, column = 0, sticky = "ew")
     frame2.columnconfigure(0, weight = 1)
@@ -796,24 +751,6 @@ def editCharWindow(name):
 
     subFrame2_1 = tk.Frame(frame2)
     subFrame2_1.grid(row = 0, column = 1, sticky = "ew")
-
-    spellScoreLabel = tk.Label(subFrame2_1, text = "Spell Score:", font = ("Arial", 10))
-    spellScoreLabel.grid(row = 0, column = 0)
-
-    spellScoreDropdown = ttk.Combobox(subFrame2_1, values = ("STR", "DEX", "CON", "INT", "WIS", "CHA"), state = "readonly")
-    spellScoreDropdown.grid(row = 0, column = 1)
-    if character.spellScore == "STR":
-        spellScoreDropdown.current(0)
-    elif character.spellScore == "DEX":
-        spellScoreDropdown.current(1)
-    elif character.spellScore == "CON":
-        spellScoreDropdown.current(2)
-    elif character.spellScore == "INT":
-        spellScoreDropdown.current(3)
-    elif character.spellScore == "WIS":
-        spellScoreDropdown.current(4)
-    elif character.spellScore == "CHA":
-        spellScoreDropdown.current(5)
 
     subFrame2_2 = tk.Frame(frame2)
     subFrame2_2.grid(row = 0, column = 2, sticky = "ew")
@@ -847,7 +784,7 @@ def editCharWindow(name):
 
     #print(spellScore)
 
-    saveButton.bind("<Button-1>", lambda event, name = character.name, type = typeDropdown, currentHP = currentHPInput, maxHP = maxHPInput, ac = acInput, str = strInput, dex = dexInput, con = conInput, int = intInput, wis = wisInput, cha = chaInput, prof = profInput, spellScore = spellScoreDropdown, initiative = initiativeInput, saves = savesInput, window = root: saveCharStatChanges(event, name, type, currentHP, maxHP, ac, str, dex, con, int, wis, cha, prof, spellScore, initiative, saves, window))
+    saveButton.bind("<Button-1>", lambda event, char = character, type = typeDropdown, currentHP = currentHPInput, maxHP = maxHPInput, ac = acInput, str = strInput, dex = dexInput, con = conInput, int = intInput, wis = wisInput, cha = chaInput, prof = profInput, initiative = initiativeInput, saves = savesInput, window = root: saveCharStatChanges(event, char, type, currentHP, maxHP, ac, str, dex, con, int, wis, cha, prof, initiative, saves, window))
 
     
 def addCharacterToSimulated(event, name):
@@ -868,11 +805,11 @@ def addCharacterToSimulated(event, name):
     simulatedCharacters.append(character)
     activeCharacter = simulatedCharacters[-1]
 
-    addCharacter(None, activeCharacter)
+    setActiveCharFrame(None, activeCharacter)
 
+#3d8, INTd8, 8dINT
 
-
-def addCharacter(event, character):
+def setActiveCharFrame(event, character):
     global targetedCharacters
     
     targetedCharacters = []
@@ -909,7 +846,7 @@ def addCharacter(event, character):
     hpGreen = PIL.Image.open("images/hpGreen.png")
     hpRed = PIL.Image.open("images/hpRed.png")
 
-    hpWidth = (charSelected.currentHP / charSelected.hp) * 460
+    hpWidth = max(0, (charSelected.currentHP / charSelected.hp) * 460)
 
     hpGreen = hpGreen.resize((int(hpWidth + 1), 50), PIL.Image.ANTIALIAS)
     hpGreen = PIL.ImageTk.PhotoImage(hpGreen)
@@ -961,15 +898,15 @@ def addCharacter(event, character):
     for i in charSelected.savingThrows:
         colors[i] = "blue"
 
-    strLabel = tk.Label(frame2, text = "STR: " + str(charSelected.str), font = ("Arial", 19), fg = colors["STR"])
-    dexLabel = tk.Label(frame2, text = "DEX: " + str(charSelected.dex), font = ("Arial", 19), fg = colors["DEX"])
-    conLabel = tk.Label(frame2, text = "CON: " + str(charSelected.con), font = ("Arial", 19), fg = colors["CON"])
-    intLabel = tk.Label(frame2, text = "INT: " + str(charSelected.intt), font = ("Arial", 19), fg = colors["INT"])
-    wisLabel = tk.Label(frame2, text = "WIS: " + str(charSelected.wis), font = ("Arial", 19), fg = colors["WIS"])
-    chaLabel = tk.Label(frame2, text = "CHA: " + str(charSelected.cha), font = ("Arial", 19), fg = colors["CHA"])
+    strLabel = tk.Label(frame2, text = "STR: " + str(charSelected.scores["STR"]), font = ("Arial", 19), fg = colors["STR"])
+    dexLabel = tk.Label(frame2, text = "DEX: " + str(charSelected.scores["DEX"]), font = ("Arial", 19), fg = colors["DEX"])
+    conLabel = tk.Label(frame2, text = "CON: " + str(charSelected.scores["CON"]), font = ("Arial", 19), fg = colors["CON"])
+    intLabel = tk.Label(frame2, text = "INT: " + str(charSelected.scores["INT"]), font = ("Arial", 19), fg = colors["INT"])
+    wisLabel = tk.Label(frame2, text = "WIS: " + str(charSelected.scores["WIS"]), font = ("Arial", 19), fg = colors["WIS"])
+    chaLabel = tk.Label(frame2, text = "CHA: " + str(charSelected.scores["CHA"]), font = ("Arial", 19), fg = colors["CHA"])
     profLabel = tk.Label(frame2, text = "Prof: " + str(charSelected.prof), font = ("Arial", 19), fg = "blue")
     editButton = tk.Button(frame2, text = "Edit", font = ("Arial", 19))
-    editButton.bind("<Button-1>", lambda event, name = charSelected.name: editCharWindow(name = name))
+    editButton.bind("<Button-1>", lambda event, char = charSelected: editCharWindow(char = char))
 
     strLabel.grid(row = 0, column = 0)
     dexLabel.grid(row = 0, column = 1)
@@ -981,7 +918,7 @@ def addCharacter(event, character):
     editButton.grid(row = 2, column = 2)
     
     createMoveList(activeCharacter)
-    createDefendersList(otherCharsFrame)
+    createDefendersList()
 
 
 
@@ -1069,14 +1006,14 @@ def calculateHit(defendingCharacter):
     score = getScore(selectedAttack.score, activeCharacter)
     partial = 20.0-defendingCharacter.ac+selectedAttack.attackBonus+getModifier(score)
       
-    #if(selectedAttack.prof):
-    #    partial += activeCharacter.prof
+    if(selectedAttack.prof):
+        partial += activeCharacter.prof
     
     hit = partial/20.0
-    print(hit)
+    #print(hit)
     crit = calculateCrit()
     if(hit < crit/100):
-        hit = crit
+        hit = crit / 100
     if(selectedAttackAdvantage == "Disadvantage"):
         return hit*hit*100
     elif(selectedAttackAdvantage == "Advantage"):
@@ -1112,22 +1049,10 @@ def calculateSave(defendingCharacter):
         
 
 def getScore(score, character):
-    if(score == "STR"):
-        return character.str
-    elif(score == "DEX"):
-        return character.dex
-    elif(score == "CON"):
-        return character.con
-    elif(score == "INT"):
-        return character.intt
-    elif(score == "WIS"):
-        return character.wis
-    elif(score == "CHA"):
-        return character.cha
+    return character.scores[score]
 
 def getModifier(score):
     result = (score-10)/2
-    #print(int(result))
     return int(result)
 
 
@@ -1139,21 +1064,42 @@ def selectAttack(attack, event):
             state = event.widget.master.winfo_children()[4].get()
             global selectedAttackAdvantage 
             selectedAttackAdvantage = state
-            createDefendersList(otherCharsFrame)
+            createDefendersList()
         else:
-            createDefendersList(otherCharsFrame)
+            createDefendersList()
     else:
         selectedAttack = None
-        createDefendersList(otherCharsFrame)
+        createDefendersList()
         
 def targetChar(target, event):
     global targetedCharacters
-    if target not in targetedCharacters:
-        targetedCharacters.append(target)
+    if([target, "Normal"] not in targetedCharacters and [target, "Advantage"] not in targetedCharacters and [target, "Disadvantage"] not in targetedCharacters):
+        targetedCharacters.append([target, "Normal"])
         event.widget.configure(text = "Targeted", font = ("Arial", 14), bg = "#C40000")
     
-    elif target in targetedCharacters:
-        targetedCharacters.remove(target)
+    elif([target, "Normal"] in targetedCharacters or [target, "Advantage"] in targetedCharacters or [target, "Disadvantage"] in targetedCharacters):
+
+        pos = -1
+
+        if(pos == -1):
+            try:
+                pos = targetedCharacters.index([target, "Normal"])
+            except ValueError:
+                pos = -1
+
+        if(pos == -1):
+            try:
+                pos = targetedCharacters.index([target, "Advantage"])
+            except ValueError:
+                pos = -1
+                
+        if(pos == -1):
+            try:
+                pos = targetedCharacters.index([target, "Disadvantage"])
+            except ValueError:
+                pos = -1
+
+        del targetedCharacters[pos]
         event.widget.configure(text = "Not Targeted", font = ("Arial", 14), bg = "#f0f0f0")
         
 def comboBoxType1Update(attack, event):
@@ -1161,10 +1107,33 @@ def comboBoxType1Update(attack, event):
     if(selectedAttack == attack):
         global selectedAttackAdvantage
         selectedAttackAdvantage = state
-        createDefendersList(otherCharsFrame)
+        createDefendersList()
         
 def comboBoxType2Update(defender, event):
     state = event.widget.get()
+
+    pos = -1
+
+    if(pos == -1):
+        try:
+            pos = targetedCharacters.index([defender, "Normal"])
+        except ValueError:
+            pos = -1
+
+    if(pos == -1):
+        try:
+            pos = targetedCharacters.index([defender, "Advantage"])
+        except ValueError:
+            pos = -1
+            
+    if(pos == -1):
+        try:
+            pos = targetedCharacters.index([defender, "Disadvantage"])
+        except ValueError:
+            pos = -1
+
+    targetedCharacters[pos] = [targetedCharacters[pos][0], state]
+
     global selectedAttackAdvantage
     selectedAttackAdvantage = state
     save = calculateSave(defender)
@@ -1239,6 +1208,7 @@ def createMoveList(activeCharacter):
             
             newAttackButton = tk.Button(newActionFrame, text = "Attack!", font = ("Arial", 15))
             newAttackButton.grid(column=3, row=0, sticky = "ew")
+            newAttackButton.bind("<Button-1>", lambda event, action = action: executeType1(action))
             
             newEditButton = tk.Button(newActionFrame, text = "Edit", font = ("Arial", 15))
             newEditButton.grid(column=3, row=1, sticky = "ew")
@@ -1281,6 +1251,10 @@ def createMoveList(activeCharacter):
 
             newAttackButton = tk.Button(newActionFrame, text = "Attack!", font = ("Arial", 15))
             newAttackButton.grid(column=3, row=0, sticky = "ew")
+            if(action.type == 2):
+                newAttackButton.bind("<Button-1>", lambda event, action = action: executeType2(action))
+            elif(action.type == 3):
+                newAttackButton.bind("<Button-1>", lambda event, action = action: executeType3(action))
 
             newEditButton = tk.Button(newActionFrame, text = "Edit", font = ("Arial", 15))
             newEditButton.grid(column=3, row=1, sticky = "ew")
@@ -1300,7 +1274,8 @@ def createMoveList(activeCharacter):
 
 
 #Section D
-def createDefendersList(defendListFrame):
+def createDefendersList():
+    defendListFrame = otherCharsFrame
     for widget in otherCharsFrame.winfo_children():
         widget.destroy()
 
@@ -1371,7 +1346,7 @@ def createDefendersList(defendListFrame):
         hpGreen = PIL.Image.open("images/hpGreen.png")
         hpRed = PIL.Image.open("images/hpRed.png")
 
-        hpWidth = (simchar.currentHP / simchar.hp) * 265
+        hpWidth = max(0, (simchar.currentHP / simchar.hp) * 265)
 
         hpGreen = hpGreen.resize((int(hpWidth + 1), 25), PIL.Image.ANTIALIAS)
         hpGreen = PIL.ImageTk.PhotoImage(hpGreen)
@@ -1455,7 +1430,7 @@ def createDefendersList(defendListFrame):
             buttonFrame.columnconfigure(1, weight = 1)
     
             targetButton = tk.Button(buttonFrame)
-            if(simchar in targetedCharacters):
+            if([simchar, "Normal"] in targetedCharacters or [simchar, "Advantage"] in targetedCharacters or [simchar, "Disadvantage"] in targetedCharacters):
                 targetButton.configure(text = "Targeted", font = ("Arial", 14), bg = "#C40000")
             else:
                 targetButton.configure(text = "Not Targeted", font = ("Arial", 14))
@@ -1464,8 +1439,185 @@ def createDefendersList(defendListFrame):
     
             editButton = tk.Button(buttonFrame, text = "Edit", font = ("Arial", 14))
             editButton.grid(row = 0, column = 1, sticky = "NEWS")
-            #editButton.bind("<Button-1", lambda event, name = simchar: editCharWindow(name))
+            editButton.bind("<Button-1>", lambda event, char = simchar: editCharWindow(char))
 
         count += 1
+
+def diceRoller(dice, bonus = 0):
+    rollResults = 0
+    for i in dice:
+        d = re.findall(r'[0-9]+', i)
+        diceNum = int(d[0])
+        diceType = int(d[1])
+
+        for j in range(diceNum):
+            rollResults = rollResults + random.randint(1, diceType)
+    rollResults = rollResults + bonus
+    return rollResults
+
+combatLog = []
+
+def cullUpdates():
+    #print(int(combatLogText.index('end-1c').split('.')[0]))
+    del combatLog[0]
+    combatLogText.config(state = tk.NORMAL)
+    combatLogText.delete('1.0', tk.END)
+    for i in combatLog:
+        combatLogText.insert(tk.INSERT, i + "\n")
+    combatLogText.config(state = tk.DISABLED)
+
+def updateLog(log):
+    #print(log)
+    combatLog.append(log)
+    combatLogText.config(state = tk.NORMAL)
+    combatLogText.delete('1.0', tk.END)
+    for i in combatLog:
+        combatLogText.insert(tk.INSERT, i + "\n")
+    combatLogText.config(state = tk.DISABLED)
+    #print(combatLogText.dlineinfo("end-2l"))
+    while(combatLogText.dlineinfo("end-1l") == None):
+        cullUpdates()
+
+
+def executeType1(action):
+    logString = activeCharacter.name + " used " + action.name + " with " + str(len(targetedCharacters)) + " targets"
+    updateLog(logString)
+    for i in targetedCharacters:
+        target = i[0]
+        toHit = diceRoller(["1d20"])
+        if(selectedAttackAdvantage == "Advantage"):
+            toHit = max(toHit, diceRoller(["1d20"]))
+        elif(selectedAttackAdvantage == "Disadvantage"):
+            toHit = min(toHit, diceRoller(["1d20"]))
+        
+        crit = False
+        if(toHit > 20 - action.crit):
+            crit = True
+        toHit = toHit + action.attackBonus + math.floor((activeCharacter.scores[action.score] - 10) / 2)
+        if(action.prof):
+            toHit = toHit + activeCharacter.prof
+
+        if(toHit + action.attackBonus >= target.ac or crit):
+            damage = diceRoller(action.damageDice, action.damageBonus)
+            critDamage = 0
+            critText = ""
+            if(crit):
+                critDamage = diceRoller(action.critDice, action.critBonus)
+                critText = "critically "
+            damage = damage + critDamage
+            target.currentHP = target.currentHP - damage
+            
+            logString = activeCharacter.name + "(Roll: " + str(toHit) + ") " + critText + "hit " + target.name + " (AC: " + str(target.ac) + ")"
+            updateLog(logString)
+
+            logString = action.name + " did " + str(damage) + " damage"
+            updateLog(logString)
+        else:
+            logString = activeCharacter.name + "(Roll: " + str(toHit) + ") missed " + target.name + " (AC: " + str(target.ac) + ")"
+            updateLog(logString)
+    
+    createDefendersList()
+
+def executeType2(action):
+    logString = activeCharacter.name + " used " + action.name + " with " + str(len(targetedCharacters)) + " targets"
+    updateLog(logString)
+    damage = diceRoller(action.damageDice, action.damageBonus)
+    for i in targetedCharacters:
+        target = i[0]
+        state = i[1]
+        save = diceRoller(["1d20"])
+        if(state == "Advantage"):
+            save = max(save, diceRoller(["1d20"]))
+        elif(state == "Disadvantage"):
+            save = min(save, diceRoller(["1d20"]))
+
+        if(action.dcSave in target.savingThrows):
+            save = save + target.prof
+
+        save = save + math.floor((target.scores[action.dcSave] - 10) / 2)
+        
+        logString = target.name + "(Save: " + str(save) + ") failed the save (DC: " + str(action.dcScore) + ") for FULL effect and took " + str(damage) + " damage"
+
+        if(save >= action.dcScore):
+            if(action.saveEffect == "HALF"):
+                damage = math.floor(damage / 2)
+                logString = target.name + "(Save: " + str(save) + ") passed the save (DC: " + str(action.dcScore) + ") for HALF effect and took " + str(damage) + " damage"
+            elif(action.saveEffect == "NONE"):
+                damage = 0
+                logString = target.name + "(Save: " + str(save) + ") passed the save (DC: " + str(action.dcScore) + ") for NONE effect and took 0 damage"
+            elif(action.saveEffect == "OTHER"):
+                logString = target.name + "(Save: " + str(save) + ") passed the save (DC: " + str(action.dcScore) + ") for OTHER effect and took " + str(damage) + " damage"
+
+        target.currentHP = target.currentHP - damage
+
+        updateLog(logString)
+    
+    createDefendersList()
+
+def executeType3(action):
+    logString = activeCharacter.name + " used " + action.name + " with " + str(len(targetedCharacters)) + " targets"
+    updateLog(logString)
+    for i in targetedCharacters:
+        target = i[0]
+        state = i[1]
+        save = diceRoller(["1d20"])
+        if(state == "Advantage"):
+            save = max(save, diceRoller(["1d20"]))
+        elif(state == "Disadvantage"):
+            save = min(save, diceRoller(["1d20"]))
+
+        save = save + math.floor((activeCharacter.scores[action.dcSave] - 10) / 2)
+
+        damage = diceRoller(action.damageDice, action.damageBonus)
+        
+        logString = target.name + "(Save: " + str(save) + ") failed the save (DC: " + str(action.dcScore) + ") for FULL effect and took " + str(damage) + " damage"
+
+        if(save < action.dcScore):
+            if(action.saveEffect == "HALF"):
+                damage = math.floor(damage / 2)
+                logString = activeCharacter.name + "(Roll: " + str(save) + ", DC: " + str(action.dcScore) + ") missed " + target.name + " for HALF effect"
+                updateLog(logString)
+                logString = action.name + " did " + str(damage) + " damage"
+                updateLog(logString)
+            elif(action.saveEffect == "NONE"):
+                damage = 0
+                logString = activeCharacter.name + "(Roll: " + str(save) + ", DC: " + str(action.dcScore) + ") missed " + target.name + " for NONE effect"
+                updateLog(logString)
+                logString = action.name + " did " + str(damage) + " damage"
+                updateLog(logString)
+            elif(action.saveEffect == "OTHER"):
+                logString = activeCharacter.name + "(Roll: " + str(save) + ", DC: " + str(action.dcScore) + ") missed " + target.name + " for OTHER effect"
+                updateLog(logString)
+                logString = action.name + " did " + str(damage) + " damage"
+                updateLog(logString)
+        else:
+            logString = activeCharacter.name + "(Roll: " + str(save) + ", DC: " + str(action.dcScore) + ") hit " + target.name
+            updateLog(logString)
+            logString = action.name + " did " + str(damage) + " damage"
+            updateLog(logString)
+
+        target.currentHP = target.currentHP - damage
+    
+    createDefendersList()
+
+combatLogScrollbar = tk.Scrollbar(combatLogFrame, orient="vertical")
+combatLogScrollbar.grid(column=1, row=0, sticky = "NS")
+
+combatLogTextCanvas = tk.Canvas(combatLogFrame, bg="#FFFFFF", height=210, width=579, scrollregion = (0,0,579,325))
+combatLogTextCanvas.grid(row = 0, column = 0, sticky="ew")
+combatLogTextCanvas.columnconfigure(0, weight = 1)
+combatLogTextCanvas.grid_propagate(0)
+
+combatLogTextCanvas.configure(yscrollcommand = combatLogScrollbar.set)
+combatLogScrollbar.configure(command = combatLogTextCanvas.yview)
+
+combatLogTextFrame = tk.Frame(combatLogTextCanvas, bg="#FFFFFF", height=910, width=579)
+combatLogTextFrame.grid(row = 0, column = 0)
+combatLogTextFrame.grid_propagate(0)
+
+combatLogTextCanvas.create_window((0,0), window=combatLogTextFrame, anchor="nw")
+
+combatLogText = tk.Text(combatLogTextFrame, height = 20, width = 72, bg = "#000000", fg = "#00FF00", wrap = tk.WORD, state = tk.DISABLED)
+combatLogText.grid(row = 0, column = 0, sticky = "ew")
 
 mainWindow.mainloop()
