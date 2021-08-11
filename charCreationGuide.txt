@@ -1,0 +1,36 @@
+Character files MUST have the following information on each line to be loaded correctly (file name can me anything but they must be in the "characters" folder), for references, check the example characters provided:
+
+Character type. Either PC, NPC or BOSS (uppercase or lowercase is fine).
+Character name. Pretty much anything will work here.
+Image file name. File name for the character portrait, must be in the "portraits" folder, if not found, will use the default one.
+Max HP. A number (integer) with the Max HP for the character.
+AC. Armor class for the character (integer).
+Initiative. Bonus initiative for the character, whatever you add to your initiative dice (integer).
+Ability Scores (STR, DEX, CON, INT, WIS, CHA). Ability scores for the character, must be comma separated (integers).
+Profieciency. Profieciency bonus for the character (integer)
+Saving Throws. Saving throw proficiencies for the character, must be comma separated (uppercase or lowercase is fine).
+Ability List. Special abilities the character has, for now it can either be "evasion" or "none".
+* (This * separates the character stats from its actions, after each action you need a * before the next one, unless it's the last action)
+Action Type. Type of action you're adding, can be either 1, 2 or 3.
+Action Name. Name of the action, pretty much anything will work here.
+//These next lines will depend on the type of action being added, if action is TYPE 1:
+    Proficiency. Boolean indicating if you're proficient with that action (true or false).
+    Score. The ability score that's used with the attack roll (STR, DEX, CON, INT, WIS, CHA).
+    Attack Bonus. Any extra bonus the action might have to the attack roll (like being a +2 mace) (integer).
+    Damage Dice. The kind of dice you roll when dealing damage with that action (must be in the form XdY, with X and Y integers)
+    Damage Bonus. Any extra bonus added to the damage roll (like being a +2 mace) (integer).
+    Crtical Range. Bonus to the critical chance of that action, 1 means it will crit on a 20, 2 on a 19 or 20, 3 on a 18, 19 or 20, etc. (integer)
+    Critical Dice. The kind of extra dice you roll when you crit (must be in the form XdY, with X and Y integers)
+    Critical Damage Bonus. Any extra bonus added to the critical damage roll (integer).
+//If action is TYPE 2:
+    Saving Throw Score. The kind of ability involved in the target making a saving throw against this action. (STR, DEX, CON, INT, WIS, CHA)
+    DC. The DC required to pass the saving throw. (integer)
+    Damage Dice. The kind of dice you roll when dealing damage with that action (must be in the form XdY, with X and Y integers)
+    Damage Bonus. Any extra bonus added to the damage roll (integer).
+    Saving Throw Effect. What happens when the targets succeeds in the saving throw, can be either HALF for half damage, NONE for no damage or OTHER for special cases.
+//If action is TYPE 3:
+    Check Score. The kind of ability involved in the active character making a check for this action to succeed. (STR, DEX, CON, INT, WIS, CHA)
+    DC. The DC required to pass the check. (integer)
+    Damage Dice. The kind of dice you roll when dealing damage with that action (must be in the form XdY, with X and Y integers)
+    Damage Bonus. Any extra bonus added to the damage roll (integer).
+    Saving Throw Effect. What happens when the targets succeeds in the saving throw, can be either HALF for half damage, NONE for no damage or OTHER for special cases.

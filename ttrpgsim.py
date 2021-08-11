@@ -20,9 +20,12 @@ class Character:
         self.actions = []
         self.currentHP = 0
         self.initiative = 0
+        self.abilities = []
+        self.saveAdvantage = "Normal"
+        self.targeted = False
 
     def __repr__(self):
-        return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Image: " + str(self.image) + "\n" + "HP: " + str(self.hp) + "\n" + "Current HP: " + str(self.currentHP) + "\n" + "AC: " + str(self.ac) + "\n" + "Initiative: " + str(self.initiative) + "\n" + "STR: " + str(self.scores["STR"]) + "\n" + "DEX: " + str(self.scores["DEX"]) + "\n" + "CON: " + str(self.scores["CON"]) + "\n" + "INT: " + str(self.scores["INT"]) + "\n" + "WIS: " + str(self.scores["WIS"]) + "\n" + "CHA: " + str(self.scores["CHA"]) + "\n" + "Proficiency Bonus: " + str(self.prof) + "\n" + "Saving Throws: " + str(self.savingThrows) + "\n" + "Actions: " + str(self.actions) + "\n"
+        return "Name: " + str(self.name) + "\n" + "Type: " + str(self.type) + "\n" + "Image: " + str(self.image) + "\n" + "HP: " + str(self.hp) + "\n" + "Current HP: " + str(self.currentHP) + "\n" + "AC: " + str(self.ac) + "\n" + "Initiative: " + str(self.initiative) + "\n" + "STR: " + str(self.scores["STR"]) + "\n" + "DEX: " + str(self.scores["DEX"]) + "\n" + "CON: " + str(self.scores["CON"]) + "\n" + "INT: " + str(self.scores["INT"]) + "\n" + "WIS: " + str(self.scores["WIS"]) + "\n" + "CHA: " + str(self.scores["CHA"]) + "\n" + "Proficiency Bonus: " + str(self.prof) + "\n" + "Saving Throws: " + str(self.savingThrows) + "\n" + "Abilities: " + str(self.abilities) + "\n" + "Save Advantage: " + str(self.saveAdvantage) + "\n" + "Targeted: " + str(self.targeted) + "\n" + "Actions: " + str(self.actions) + "\n"
 
 class Action:
     #type = name = score = attackBonus = damageDice = damageBonus = crit = critDice = critBonus = dcSave = dcScore = saveEffect = hybrids = prof = 0
@@ -53,7 +56,7 @@ class Action:
 def parseCharacter(name):
     f = open("characters/" + name, "r")
     character = Character()
-    character.type = f.readline().strip(" \n")
+    character.type = f.readline().strip(" \n").upper()
     character.name = f.readline().strip(" \n")
     character.image = f.readline().strip(" \n")
     character.hp = int(f.readline().strip(" \n"))
@@ -69,7 +72,7 @@ def parseCharacter(name):
     character.scores["CHA"] = int(scores[5])
     character.prof = int(f.readline().strip(" \n"))
     character.savingThrows = f.readline().strip(" \n").upper().split(", ")
-    character.actions = []
+    character.abilities = f.readline().strip(" \n").upper().split(", ")
 
     token = f.readline().strip(" \n")
 
@@ -820,7 +823,6 @@ def addCharacterToSimulated(event, name):
     global activeCharacter
 
     character = copy.deepcopy(characterList[name])
-    print(character)
     n = character.name + " 1"
     c = 2
 
@@ -839,9 +841,6 @@ def addCharacterToSimulated(event, name):
 #3d8, INTd8, 8dINT
 
 def setActiveCharFrame(event, character):
-    global targetedCharacters
-    
-    targetedCharacters = []
     charSelected = character
 
     for i in activeDataFrame.winfo_children():
@@ -947,6 +946,8 @@ def setActiveCharFrame(event, character):
     editButton.grid(row = 2, column = 2)
     
     createMoveList(activeCharacter)
+    resetTargets()
+    resetAdvantages()
     createDefendersList()
 
 
@@ -1027,7 +1028,6 @@ activeCharacter = None
 simulatedCharacters = []
 selectedAttack = None
 selectedAttackAdvantage = "Normal"
-targetedCharacters = []
 
 
 def calculateHit(defendingCharacter):
@@ -1069,9 +1069,9 @@ def calculateSave(defendingCharacter):
         partial += defendingCharacter.prof
         
     save = partial/20.0
-    if(selectedAttackAdvantage == "Disadvantage"):
+    if(defendingCharacter.saveAdvantage == "Disadvantage"):
         return save*save*100
-    elif(selectedAttackAdvantage == "Advantage"):
+    elif(defendingCharacter.saveAdvantage == "Advantage"):
         return (1-(1-save)*(1-save))*100
     else:
         return save*100
@@ -1101,35 +1101,13 @@ def selectAttack(attack, event):
         createDefendersList()
         
 def targetChar(target, event):
-    global targetedCharacters
-    if([target, "Normal"] not in targetedCharacters and [target, "Advantage"] not in targetedCharacters and [target, "Disadvantage"] not in targetedCharacters):
-        targetedCharacters.append([target, "Normal"])
-        event.widget.configure(text = "Targeted", font = ("Arial", 14), bg = "#C40000")
-    
-    elif([target, "Normal"] in targetedCharacters or [target, "Advantage"] in targetedCharacters or [target, "Disadvantage"] in targetedCharacters):
-
-        pos = -1
-
-        if(pos == -1):
-            try:
-                pos = targetedCharacters.index([target, "Normal"])
-            except ValueError:
-                pos = -1
-
-        if(pos == -1):
-            try:
-                pos = targetedCharacters.index([target, "Advantage"])
-            except ValueError:
-                pos = -1
-                
-        if(pos == -1):
-            try:
-                pos = targetedCharacters.index([target, "Disadvantage"])
-            except ValueError:
-                pos = -1
-
-        del targetedCharacters[pos]
+    if(target.targeted):
+        target.targeted = False
         event.widget.configure(text = "Not Targeted", font = ("Arial", 14), bg = "#f0f0f0")
+    
+    else:
+        target.targeted = True
+        event.widget.configure(text = "Targeted", font = ("Arial", 14), bg = "#C40000")
         
 def comboBoxType1Update(attack, event):
     state = event.widget.get()
@@ -1140,39 +1118,13 @@ def comboBoxType1Update(attack, event):
         
 def comboBoxType2Update(defender, event):
     state = event.widget.get()
-
-    pos = -1
-
-    if(pos == -1):
-        try:
-            pos = targetedCharacters.index([defender, "Normal"])
-        except ValueError:
-            pos = -1
-
-    if(pos == -1):
-        try:
-            pos = targetedCharacters.index([defender, "Advantage"])
-        except ValueError:
-            pos = -1
-            
-    if(pos == -1):
-        try:
-            pos = targetedCharacters.index([defender, "Disadvantage"])
-        except ValueError:
-            pos = -1
-
-    if(pos != -1):
-        targetedCharacters[pos] = [targetedCharacters[pos][0], state]
-
-    global selectedAttackAdvantage
-    selectedAttackAdvantage = state
+    defender.saveAdvantage = state
     save = calculateSave(defender)
     event.widget.master.winfo_children()[1].configure(text = str(round(save, 2)) + "% to pass Save", font = ("Arial", 14))
 
 def comboBoxType3Update(defender, event):
     state = event.widget.get()
-    global selectedAttackAdvantage
-    selectedAttackAdvantage = state
+    defender.saveAdvantage = state
     save = calculateSave(defender)
     event.widget.master.winfo_children()[1].configure(text = str(round(save, 2)) + "% to pass Check", font = ("Arial", 14))
 
@@ -1301,10 +1253,17 @@ def createMoveList(activeCharacter):
 
 ############################
 
+def resetAdvantages():
+    for i in simulatedCharacters:
+        i.saveAdvantage = "Normal"
 
+def resetTargets():
+    for i in simulatedCharacters:
+        i.targeted = False
 
 #Section D
 def createDefendersList():
+
     defendListFrame = otherCharsFrame
     for widget in otherCharsFrame.winfo_children():
         widget.destroy()
@@ -1432,7 +1391,12 @@ def createDefendersList():
                 rollCombobox = ttk.Combobox(probabilityFrame)
                 rollCombobox.grid(row = 0, column = 0)
                 rollCombobox["values"] = ("Normal", "Advantage", "Disadvantage")
-                rollCombobox.current(0)
+                if(simchar.saveAdvantage == "Normal"):
+                    rollCombobox.current(0)
+                elif(simchar.saveAdvantage == "Advantage"):
+                    rollCombobox.current(1)
+                elif(simchar.saveAdvantage == "Disadvantage"):
+                    rollCombobox.current(2)
                 rollCombobox["state"] = "readonly"
                 rollCombobox.bind('<<ComboboxSelected>>', lambda event, name = simchar: comboBoxType2Update(defender = name, event = event))
     
@@ -1444,7 +1408,12 @@ def createDefendersList():
                 rollCombobox = ttk.Combobox(probabilityFrame)
                 rollCombobox.grid(row = 0, column = 0)
                 rollCombobox["values"] = ("Normal", "Advantage", "Disadvantage")
-                rollCombobox.current(0)
+                if(simchar.saveAdvantage == "Normal"):
+                    rollCombobox.current(0)
+                elif(simchar.saveAdvantage == "Advantage"):
+                    rollCombobox.current(1)
+                elif(simchar.saveAdvantage == "Disadvantage"):
+                    rollCombobox.current(2)
                 rollCombobox["state"] = "readonly"
                 rollCombobox.bind('<<ComboboxSelected>>', lambda event, name = activeCharacter: comboBoxType3Update(defender = name, event = event))
     
@@ -1460,7 +1429,7 @@ def createDefendersList():
             buttonFrame.columnconfigure(1, weight = 1)
     
             targetButton = tk.Button(buttonFrame)
-            if([simchar, "Normal"] in targetedCharacters or [simchar, "Advantage"] in targetedCharacters or [simchar, "Disadvantage"] in targetedCharacters):
+            if(simchar.targeted):
                 targetButton.configure(text = "Targeted", font = ("Arial", 14), bg = "#C40000")
             else:
                 targetButton.configure(text = "Not Targeted", font = ("Arial", 14))
@@ -1510,10 +1479,11 @@ def updateLog(log):
 
 
 def executeType1(action):
+    targetedCharacters = list(filter(lambda i: i.targeted, simulatedCharacters))
     logString = activeCharacter.name + " used " + action.name + " with " + str(len(targetedCharacters)) + " targets"
     updateLog(logString)
     for i in targetedCharacters:
-        target = i[0]
+        target = i
         toHit = diceRoller(["1d20"])
         if(selectedAttackAdvantage == "Advantage"):
             toHit = max(toHit, diceRoller(["1d20"]))
@@ -1549,12 +1519,13 @@ def executeType1(action):
     createDefendersList()
 
 def executeType2(action):
+    targetedCharacters = list(filter(lambda i: i.targeted, simulatedCharacters))
     logString = activeCharacter.name + " used " + action.name + " with " + str(len(targetedCharacters)) + " targets"
     updateLog(logString)
     damage = diceRoller(action.damageDice, action.damageBonus)
     for i in targetedCharacters:
-        target = i[0]
-        state = i[1]
+        target = i
+        state = i.saveAdvantage
         save = diceRoller(["1d20"])
         if(state == "Advantage"):
             save = max(save, diceRoller(["1d20"]))
@@ -1570,13 +1541,21 @@ def executeType2(action):
 
         if(save >= action.dcScore):
             if(action.saveEffect == "HALF"):
-                damage = math.floor(damage / 2)
-                logString = target.name + "(Save: " + str(save) + ") passed the save (DC: " + str(action.dcScore) + ") for HALF effect and took " + str(damage) + " damage"
+                if("EVASION" not in target.abilities):
+                    damage = math.floor(damage / 2)
+                    logString = target.name + "(Save: " + str(save) + ") passed the save (DC: " + str(action.dcScore) + ") for HALF effect and took " + str(damage) + " damage"
+                else:
+                    damage = 0
+                    logString = target.name + "(Save: " + str(save) + ") passed the save (DC: " + str(action.dcScore) + "), used EVASION for NONE effect and took 0 damage"
             elif(action.saveEffect == "NONE"):
                 damage = 0
                 logString = target.name + "(Save: " + str(save) + ") passed the save (DC: " + str(action.dcScore) + ") for NONE effect and took 0 damage"
             elif(action.saveEffect == "OTHER"):
                 logString = target.name + "(Save: " + str(save) + ") passed the save (DC: " + str(action.dcScore) + ") for OTHER effect and took " + str(damage) + " damage"
+
+        if(save < action.dcScore and "EVASION" in target.abilities):
+            damage =  math.floor(damage / 2)
+            logString = target.name + "(Save: " + str(save) + ") failed the save (DC: " + str(action.dcScore) + "), used EVASION for HALF effect and took " + str(damage) + " damage"
 
         target.currentHP = target.currentHP - damage
 
@@ -1585,11 +1564,12 @@ def executeType2(action):
     createDefendersList()
 
 def executeType3(action):
+    targetedCharacters = list(filter(lambda i: i.targeted, simulatedCharacters))
     logString = activeCharacter.name + " used " + action.name + " with " + str(len(targetedCharacters)) + " targets"
     updateLog(logString)
     for i in targetedCharacters:
-        target = i[0]
-        state = i[1]
+        target = i
+        state = i.saveAdvantage
         save = diceRoller(["1d20"])
         if(state == "Advantage"):
             save = max(save, diceRoller(["1d20"]))
