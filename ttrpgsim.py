@@ -160,39 +160,39 @@ charFrame = tk.Frame(mainWindow, height = 910, width = 300)
 charFrame.grid(column=0, row=0)
 charFrame.grid_propagate(0)
 
-charFilterFrame = tk.Frame(charFrame, bg="#B6B6B6", height = 150, width=300)
+charFilterFrame = tk.Frame(charFrame, height = 150, width=300)
 charFilterFrame.grid(column=0, row=0, sticky="EW")
 
 charFilterFrame.columnconfigure(0, weight=1)
 
-charFilterButtonPC = tk.Button(charFilterFrame, text="PCs", font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
+charFilterButtonPC = tk.Button(charFilterFrame, text="PCs", font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4, bg="#b0b0b0")
 charFilterButtonPC.grid(column=0, row=0, sticky="EW")
 
-charFilterButtonNPC = tk.Button(charFilterFrame, text="NPCs",font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
+charFilterButtonNPC = tk.Button(charFilterFrame, text="NPCs",font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4, bg="#b0b0b0")
 charFilterButtonNPC.grid(column=0, row=1, sticky="EW")
 
-charFilterButtonBoss = tk.Button(charFilterFrame, text="Bosses",font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4)
+charFilterButtonBoss = tk.Button(charFilterFrame, text="Bosses",font = ("Arial", 19), relief = tk.GROOVE, borderwidth = 4, bg="#b0b0b0")
 charFilterButtonBoss.grid(column=0, row=2, sticky="EW")
 
 
 
 #########################
 
-charListFrame = tk.Frame(charFrame, bg="#C40000", height = 760, width=300)
+charListFrame = tk.Frame(charFrame, height = 760, width=300)
 charListFrame.grid(column=0, row=1)
 charListFrame.grid_propagate(0)
 
 charListScrollbar = tk.Scrollbar(charListFrame, orient="vertical")
 charListScrollbar.grid(column=1, row=0, sticky = "NS")
 
-charListCanvas = tk.Canvas(charListFrame, bg="#00C400", height = 760, width=279, scrollregion = (0,0,279,1000))
+charListCanvas = tk.Canvas(charListFrame, bg="#0000C4" , height = 760, width=279, scrollregion = (0,0,279,760))
 charListCanvas.grid(column=0, row=0, sticky="EW")
 charListCanvas.grid_propagate(0)
 
 charListCanvas.configure(yscrollcommand = charListScrollbar.set)
 charListScrollbar.configure(command = charListCanvas.yview)
 
-charListMagicFrame = tk.Frame(charListCanvas, bg="#0000C4", height=1000, width=279)
+charListMagicFrame = tk.Frame(charListCanvas, bg="#0000C4", height=760, width=279)
 charListMagicFrame.grid(column=0, row=0)
 
 charListCanvas.create_window((0,0), window=charListMagicFrame, anchor="nw")
@@ -201,26 +201,28 @@ activeCharFrame = tk.Frame(mainWindow, height = 910, width = 600)
 activeCharFrame.grid(column=1, row=0)
 activeCharFrame.grid_propagate(0)
 
-activeDataFrame = tk.Frame(activeCharFrame, bg = "blue", height = 300, width = 600)
+activeDataFrame = tk.Frame(activeCharFrame, height = 300, width = 600)
 activeDataFrame.grid(column=0, row=0)
 activeDataFrame.grid_propagate(0)
 activeDataFrame.columnconfigure(0, weight=1)
 
-attackListFrame = tk.Frame(activeCharFrame, bg = "green", height = 400, width = 600)
+attackListFrame = tk.Frame(activeCharFrame, height = 400, width = 600)
 attackListFrame.grid(column=0, row=1)
 attackListFrame.grid_propagate(0)
 
-combatLogFrame = tk.Frame(activeCharFrame, bg = "#AC3BF6", height = 210, width = 600)
+combatLogFrame = tk.Frame(activeCharFrame, height = 210, width = 600)
 combatLogFrame.grid(column=0, row=2)
 combatLogFrame.grid_propagate(0)
 
-otherCharsFrame = tk.Frame(mainWindow, bg="#EBF63B", height = 910, width = 400)
+otherCharsFrame = tk.Frame(mainWindow, height = 910, width = 400)
 otherCharsFrame.grid(column=2, row=0)
 otherCharsFrame.grid_propagate(0)
 
-turnsFrame = tk.Frame(mainWindow, bg="#11E9ff", height = 910, width = 300)
+turnsFrame = tk.Frame(mainWindow, height = 910, width = 300)
 turnsFrame.grid(column=3, row=0)
 turnsFrame.grid_propagate(0)
+turnsFrame.rowconfigure(0, weight=0)
+turnsFrame.rowconfigure(1, weight=1)
 
 def saveType1StatChanges(event, score, attackBonus, damageDice, damageBonus, crit, critDice, critBonus, prof, character, action, window):
     score = score.get()
@@ -832,11 +834,13 @@ def addCharacterToSimulated(event, name):
             c = c + 1
 
     character.name = n
-
+    character.rolledInit = rollInitiative(character)
+    
     simulatedCharacters.append(character)
     activeCharacter = simulatedCharacters[-1]
 
     setActiveCharFrame(None, activeCharacter)
+    createTurnList()
 
 #3d8, INTd8, 8dINT
 
@@ -949,6 +953,7 @@ def setActiveCharFrame(event, character):
     resetTargets()
     resetAdvantages()
     createDefendersList()
+    createTurnList()
 
 
 
@@ -966,7 +971,7 @@ def createCharList():
     for widget in charListMagicFrame.winfo_children():
         widget.destroy()
         
-    if(len(charList) > 10):
+    if(len(charList) > 7):
         newHeight = len(charList)*100
         charListCanvas.configure(scrollregion = (0,0,279,newHeight))
         charListMagicFrame.configure(height = newHeight)
@@ -998,23 +1003,35 @@ def createCharList():
         addButton.grid(column=1, row=1)
         count += 1
 
-def toggleCharfilter(filter):
+def toggleCharfilter(filter, event):
     if(filter == "PC"):
         global flagPCfilter
+        if(flagPCfilter):
+            event.widget.configure(bg="#b0b0b0")
+        else:
+            event.widget.configure(bg="#f0f0f0")
         flagPCfilter= not flagPCfilter
         createCharList()
     elif(filter == "NPC"):
-        global flagNPCfilter 
+        global flagNPCfilter
+        if(flagNPCfilter):
+            event.widget.configure(bg="#b0b0b0")
+        else:
+            event.widget.configure(bg="#f0f0f0")
         flagNPCfilter = not flagNPCfilter
         createCharList()
     elif(filter == "BOSS"):
-        global flagBOSSfilter 
+        global flagBOSSfilter
+        if(flagBOSSfilter):
+            event.widget.configure(bg="#b0b0b0")
+        else:
+            event.widget.configure(bg="#f0f0f0")
         flagBOSSfilter = not flagBOSSfilter
         createCharList()
         
-charFilterButtonPC.configure(command = lambda: toggleCharfilter("PC"))
-charFilterButtonNPC.configure(command = lambda: toggleCharfilter("NPC"))
-charFilterButtonBoss.configure(command = lambda: toggleCharfilter("BOSS"))
+charFilterButtonPC.bind("<Button-1>", lambda event: toggleCharfilter("PC", event))
+charFilterButtonNPC.bind("<Button-1>", lambda event: toggleCharfilter("NPC", event))
+charFilterButtonBoss.bind("<Button-1>", lambda event: toggleCharfilter("BOSS", event))
 
 
 createCharList()
@@ -1028,7 +1045,6 @@ activeCharacter = None
 simulatedCharacters = []
 selectedAttack = None
 selectedAttackAdvantage = "Normal"
-
 
 def calculateHit(defendingCharacter):
     
@@ -1137,14 +1153,14 @@ def createMoveList(activeCharacter):
     attackListScrollbar = tk.Scrollbar(attackListFrame, orient="vertical")
     attackListScrollbar.grid(column=1, row=0, sticky = "NS")
 
-    attackListCanvas = tk.Canvas(attackListFrame, bg="#00C400", height=400, width=579, scrollregion = (0,0,579,1000))
+    attackListCanvas = tk.Canvas(attackListFrame, bg="#00C400", height=400, width=579, scrollregion = (0,0,579,400))
     attackListCanvas.grid(column=0, row=0, sticky="EW")
     attackListCanvas.grid_propagate(0)
 
     attackListCanvas.configure(yscrollcommand = attackListScrollbar.set)
     attackListScrollbar.configure(command = attackListCanvas.yview)
 
-    attackListMagicFrame = tk.Frame(attackListCanvas, bg="#0000C4", height=1000, width=579)
+    attackListMagicFrame = tk.Frame(attackListCanvas, bg="#0000C4", height=400, width=579)
     attackListMagicFrame.grid(column=0, row=0)
     attackListMagicFrame.grid_propagate(0)
 
@@ -1154,7 +1170,7 @@ def createMoveList(activeCharacter):
     for action in  activeCharacter.actions:
         if (action.type == 1 or action.type == 2):
             count += 1
-    if (count > 10):
+    if (count > 4):
         attackListCanvas.configure(scrollregion = (0,0,579,100*count))
         attackListMagicFrame.configure(height=100*count)
     
@@ -1248,9 +1264,156 @@ def createMoveList(activeCharacter):
             newActionFrame.columnconfigure(3, weight = 2)
 
             count += 1
-            
 
 
+def createTurnList():
+    
+    for widget in turnsFrame.winfo_children():
+        widget.destroy()
+
+    turnContainerFrame = tk.Frame(turnsFrame, height=860, width=300)
+    turnContainerFrame.grid(row=0, column=0)
+
+    turnListScrollbar = tk.Scrollbar(turnContainerFrame, orient="vertical")
+    turnListScrollbar.grid(column=1, row=0, sticky = "NS")
+
+    turnListCanvas = tk.Canvas(turnContainerFrame, bg="#00C400", height=860, width=279, scrollregion = (0,0,279,810))
+    turnListCanvas.grid(column=0, row=0, sticky="EW")
+    turnListCanvas.grid_propagate(0)
+
+    turnListCanvas.configure(yscrollcommand = turnListScrollbar.set)
+    turnListScrollbar.configure(command = turnListCanvas.yview)
+
+    turnListMagicFrame = tk.Frame(turnListCanvas, bg="#0000C4", height=860, width=279)
+    turnListMagicFrame.grid(column=0, row=0)
+    turnListMagicFrame.grid_propagate(0)
+
+    turnListCanvas.create_window((0,0), window=turnListMagicFrame, anchor="nw")
+
+    turnControlFrame = tk.Frame(turnsFrame, height=50, width=300)
+    turnControlFrame.grid(row=1, column=0, sticky="NEWS")
+    turnControlFrame.columnconfigure(0, weight=1)
+    turnControlFrame.columnconfigure(1, weight=1)
+    turnControlFrame.columnconfigure(2, weight=1)
+    turnControlFrame.rowconfigure(0, weight=1)
+
+    sortButton = tk.Button(turnControlFrame, text="Sort", font=("Arial", 10))
+    sortButton.grid(row=0, column=0, sticky="NEWS")
+    sortButton.configure(command = sortByInit)
+    
+    rerollButton = tk.Button(turnControlFrame, text="Reroll Initiative", font=("Arial", 10))
+    rerollButton.grid(row=0, column=1, sticky="NEWS")
+    rerollButton.configure(command = rerollInitiative)
+
+    nextButton = tk.Button(turnControlFrame, text="Next Turn", font=("Arial", 10))
+    nextButton.grid(row=0, column=2, sticky="NEWS")
+    nextButton.configure(command = nextTurn)
+
+    if(len(simulatedCharacters) > 8):
+        turnListCanvas.configure(scrollregion = (0,0, 279, 100*(len(simulatedCharacters))))
+        turnListMagicFrame.configure(height=100*(len(simulatedCharacters)))
+
+    count = 0
+
+    for simchar in simulatedCharacters:
+
+        if simchar == activeCharacter:
+            frameColor = "#b0b0b0"
+        else:
+            frameColor = "#f0f0f0"
+
+        charFrame = tk.Frame(turnListMagicFrame, height=100, width=279, relief = tk.GROOVE, borderwidth = 4, bg=frameColor)
+        charFrame.grid(column=0, row=count)
+        charFrame.grid_propagate(0)
+        charFrame.columnconfigure(0, weight=1)
+        charFrame.columnconfigure(1, weight=1)
+        charFrame.columnconfigure(2, weight=1)
+
+        subFrame1 = tk.Frame(charFrame, width = 169, height = 92, bg=frameColor)
+        subFrame1.grid(column=0, row=0)
+        subFrame1.grid_propagate(0)
+
+        nameFrame = tk.Frame(subFrame1, width = 169 , height = 60, bg=frameColor)
+        nameFrame.grid(column=0, row=0, sticky = "w")
+        nameFrame.grid_propagate(0)
+
+        try:
+            portrait = PIL.Image.open("portraits/" + simchar.image)
+        except:
+            portrait = PIL.Image.open("portraits/default.png")
+
+        portrait = portrait.resize((50,50), PIL.Image.ANTIALIAS)
+        TKportrait = PIL.ImageTk.PhotoImage(portrait)
+
+        portraitLabel = tk.Label(nameFrame, image = TKportrait)
+        portraitLabel.image = TKportrait
+        portraitLabel.grid(row=0, column=0, padx=2, pady=2)
+
+        nameLabel = tk.Label(nameFrame, text = simchar.name , font = ("Arial", 10), bg=frameColor, wraplength = 110)
+        nameLabel.grid(row=0 , column = 1, sticky = "ew")
+
+        buttonsFrame = tk.Frame(subFrame1, width = 169, height = 32)
+        buttonsFrame.grid(column=0, row=1)
+        buttonsFrame.grid_propagate(0)
+        buttonsFrame.columnconfigure(0, weight = 1)
+        buttonsFrame.rowconfigure(0, weight = 1)
+
+        setButton = tk.Button(buttonsFrame, text = "Set Active", font=("Arial", 9))
+        setButton.grid(row=0, column = 0, sticky = "NEWS")
+        setButton.bind("<Button-1>", lambda event, char = simchar: setAsActive(char))
+
+        subFrame2 = tk.Frame(charFrame, width=30, height = 92 , bg=frameColor)
+        subFrame2.grid(row = 0, column = 1, sticky = "ns")
+        subFrame2.rowconfigure(0, weight = 1)
+        subFrame2.rowconfigure(1, weight = 1)
+        subFrame2.columnconfigure(0, weight = 1)
+
+        arrowUp = PIL.Image.open("images/arrowUp.png")
+        arrowDown = PIL.Image.open("images/arrowDown.png")
+        resize = 25
+        arrowUp = arrowUp.resize((resize, resize), PIL.Image.ANTIALIAS)
+        arrowUp = PIL.ImageTk.PhotoImage(arrowUp)
+        arrowDown = arrowDown.resize((resize, resize), PIL.Image.ANTIALIAS)
+        arrowDown = PIL.ImageTk.PhotoImage(arrowDown)
+
+        upButton = tk.Button(subFrame2, image = arrowUp)
+        upButton.image = arrowUp
+        upButton.grid(row=0, column = 0, sticky = "NEWS")
+        upButton.bind("<Button-1>", lambda event, char = simchar: moveTurnUP(char))
+
+        downButton = tk.Button(subFrame2, image = arrowDown)
+        downButton.image = arrowDown
+        downButton.grid(row=1, column = 0, sticky = "NEWS")
+        downButton.bind("<Button-1>", lambda event, char = simchar: moveTurnDOWN(char))
+
+        subFrame3 = tk.Frame(charFrame, width=72, height = 92 , bg=frameColor)
+        subFrame3.grid(row=0, column=2)
+        subFrame3.grid_propagate(0)
+        subFrame3.rowconfigure(0, weight=1)
+        subFrame3.rowconfigure(1, weight=1)
+        subFrame3.columnconfigure(0, weight=1)
+
+        initFrame = tk.Frame(subFrame3, height= 60, width=72, bg=frameColor)
+        initFrame.grid(row=0, column=0)
+        initFrame.grid_propagate(0)
+        initFrame.columnconfigure(0, weight=1)
+        initFrame.rowconfigure(0, weight=1)
+
+        initLabel = tk.Label(initFrame, text=str(simchar.rolledInit), font=("Arial", 34), bg=frameColor)
+        initLabel.grid(row=0, column=0, sticky = "NEWS")
+
+        editFrame = tk.Frame(subFrame3, height = 32,  width= 72)
+        editFrame.grid(row=1, column=0)
+        editFrame.grid_propagate(0)
+        editFrame.columnconfigure(0, weight=1)
+        editFrame.rowconfigure(0, weight=1)
+
+        editButton = tk.Button(editFrame, text="Edit", font=("Arial", 9))
+        editButton.grid(row=0, column=0, sticky="NEWS")
+        editButton.grid_propagate(0)
+
+        count += 1
+        
 ############################
 
 def resetAdvantages():
@@ -1464,6 +1627,44 @@ def cullUpdates():
     for i in combatLog:
         combatLogText.insert(tk.INSERT, i + "\n")
     combatLogText.config(state = tk.DISABLED)
+    
+def rollInitiative(character):
+    bonus = getModifier(character.scores["DEX"])+character.initiative
+    return diceRoller(["1d20"], bonus)
+
+def sortByInit():
+    simulatedCharacters.sort(key=lambda x: x.rolledInit, reverse=True)
+    createTurnList()
+    
+def rerollInitiative():
+    for simchar in simulatedCharacters:
+        simchar.rolledInit = rollInitiative(simchar)
+    createTurnList()
+    
+def nextTurn():
+    global activeCharacter
+    idx = simulatedCharacters.index(activeCharacter)
+    if(idx == (len(simulatedCharacters)-1)):
+        setAsActive(simulatedCharacters[0])
+    else:
+        setAsActive(simulatedCharacters[idx+1])
+
+def setAsActive(character):
+    global activeCharacter
+    activeCharacter = character
+    setActiveCharFrame(None, activeCharacter)
+    
+def moveTurnUP(character):
+    idx = simulatedCharacters.index(character)
+    if(idx != 0):
+        simulatedCharacters[idx-1], simulatedCharacters[idx] = simulatedCharacters[idx], simulatedCharacters[idx-1]
+        createTurnList()
+        
+def moveTurnDOWN(character):
+    idx = simulatedCharacters.index(character)
+    if(idx != (len(simulatedCharacters)-1)):
+        simulatedCharacters[idx+1], simulatedCharacters[idx] = simulatedCharacters[idx], simulatedCharacters[idx+1]
+        createTurnList()
 
 def updateLog(log):
     #print(log)
@@ -1579,8 +1780,6 @@ def executeType3(action):
         save = save + math.floor((activeCharacter.scores[action.dcSave] - 10) / 2)
 
         damage = diceRoller(action.damageDice, action.damageBonus)
-        
-        logString = target.name + "(Save: " + str(save) + ") failed the save (DC: " + str(action.dcScore) + ") for FULL effect and took " + str(damage) + " damage"
 
         if(save < action.dcScore):
             if(action.saveEffect == "HALF"):
