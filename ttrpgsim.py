@@ -5,6 +5,8 @@ from PIL.Image import init
 import math, re, random, copy, PIL.ImageTk, os
 import inspect
 
+mainColor = "#0000C4"
+
 class Character:
     #type = name = image = hp = ac = prof = savingThrows = actions = currentHP = initiative = 0
 
@@ -185,19 +187,19 @@ charListFrame.grid_propagate(0)
 charListScrollbar = tk.Scrollbar(charListFrame, orient="vertical")
 charListScrollbar.grid(column=1, row=0, sticky = "NS")
 
-charListCanvas = tk.Canvas(charListFrame, bg="#0000C4" , height = 760, width=279, scrollregion = (0,0,279,760))
+charListCanvas = tk.Canvas(charListFrame, bg=mainColor , height = 760, width=279, scrollregion = (0,0,279,760))
 charListCanvas.grid(column=0, row=0, sticky="EW")
 charListCanvas.grid_propagate(0)
 
 charListCanvas.configure(yscrollcommand = charListScrollbar.set)
 charListScrollbar.configure(command = charListCanvas.yview)
 
-charListMagicFrame = tk.Frame(charListCanvas, bg="#0000C4", height=760, width=279)
+charListMagicFrame = tk.Frame(charListCanvas, bg=mainColor, height=760, width=279)
 charListMagicFrame.grid(column=0, row=0)
 
 charListCanvas.create_window((0,0), window=charListMagicFrame, anchor="nw")
 
-activeCharFrame = tk.Frame(mainWindow, height = 910, width = 600)
+activeCharFrame = tk.Frame(mainWindow, height = 910, width = 600, relief = tk.GROOVE, borderwidth = 1)
 activeCharFrame.grid(column=1, row=0)
 activeCharFrame.grid_propagate(0)
 
@@ -214,11 +216,11 @@ combatLogFrame = tk.Frame(activeCharFrame, height = 210, width = 600)
 combatLogFrame.grid(column=0, row=2)
 combatLogFrame.grid_propagate(0)
 
-otherCharsFrame = tk.Frame(mainWindow, height = 910, width = 400)
+otherCharsFrame = tk.Frame(mainWindow, height = 910, width = 400, relief = tk.GROOVE, borderwidth = 1)
 otherCharsFrame.grid(column=2, row=0)
 otherCharsFrame.grid_propagate(0)
 
-turnsFrame = tk.Frame(mainWindow, height = 910, width = 300)
+turnsFrame = tk.Frame(mainWindow, height = 910, width = 300, relief = tk.GROOVE, borderwidth = 1)
 turnsFrame.grid(column=3, row=0)
 turnsFrame.grid_propagate(0)
 turnsFrame.rowconfigure(0, weight=0)
@@ -1160,7 +1162,7 @@ def createMoveList(activeCharacter):
     attackListCanvas.configure(yscrollcommand = attackListScrollbar.set)
     attackListScrollbar.configure(command = attackListCanvas.yview)
 
-    attackListMagicFrame = tk.Frame(attackListCanvas, bg="#0000C4", height=400, width=579)
+    attackListMagicFrame = tk.Frame(attackListCanvas, bg=mainColor, height=400, width=579)
     attackListMagicFrame.grid(column=0, row=0)
     attackListMagicFrame.grid_propagate(0)
 
@@ -1265,6 +1267,16 @@ def createMoveList(activeCharacter):
 
             count += 1
 
+def checkInitEntry(c, what, new):
+    character = list(filter(lambda i: i.name == c, simulatedCharacters))[0]
+    if(what.isdigit()):
+        if(new == ""):
+            new = 0
+        character.rolledInit = int(new)
+        return True
+    else:
+        return False
+
 
 def createTurnList():
     
@@ -1284,7 +1296,7 @@ def createTurnList():
     turnListCanvas.configure(yscrollcommand = turnListScrollbar.set)
     turnListScrollbar.configure(command = turnListCanvas.yview)
 
-    turnListMagicFrame = tk.Frame(turnListCanvas, bg="#0000C4", height=860, width=279)
+    turnListMagicFrame = tk.Frame(turnListCanvas, bg=mainColor, height=860, width=279)
     turnListMagicFrame.grid(column=0, row=0)
     turnListMagicFrame.grid_propagate(0)
 
@@ -1301,7 +1313,7 @@ def createTurnList():
     sortButton.grid(row=0, column=0, sticky="NEWS")
     sortButton.configure(command = sortByInit)
     
-    rerollButton = tk.Button(turnControlFrame, text="Reroll Initiative", font=("Arial", 10))
+    rerollButton = tk.Button(turnControlFrame, text="Reroll All", font=("Arial", 10))
     rerollButton.grid(row=0, column=1, sticky="NEWS")
     rerollButton.configure(command = rerollInitiative)
 
@@ -1399,8 +1411,13 @@ def createTurnList():
         initFrame.columnconfigure(0, weight=1)
         initFrame.rowconfigure(0, weight=1)
 
-        initLabel = tk.Label(initFrame, text=str(simchar.rolledInit), font=("Arial", 34), bg=frameColor)
-        initLabel.grid(row=0, column=0, sticky = "NEWS")
+        #initLabel = tk.Label(initFrame, text=str(simchar.rolledInit), font=("Arial", 34), bg=frameColor)
+        #initLabel.grid(row=0, column=0, sticky = "NEWS")
+        func = initFrame.register(checkInitEntry)
+        initEntry = ttk.Entry(initFrame, validate = "key", validatecommand = (func, simchar.name, "%S", "%P"), font=("Arial", 34))
+        initEntry.grid(row=0, column=0, sticky = "nsew")
+        initEntry.insert(tk.INSERT, simchar.rolledInit)
+
 
         editFrame = tk.Frame(subFrame3, height = 32,  width= 72)
         editFrame.grid(row=1, column=0)
@@ -1408,8 +1425,9 @@ def createTurnList():
         editFrame.columnconfigure(0, weight=1)
         editFrame.rowconfigure(0, weight=1)
 
-        editButton = tk.Button(editFrame, text="Edit", font=("Arial", 9))
+        editButton = tk.Button(editFrame, text="Reroll", font=("Arial", 9))
         editButton.grid(row=0, column=0, sticky="NEWS")
+        editButton.bind("<Button-1>", lambda event, character = simchar: rerollInitiative(character = character))
         editButton.grid_propagate(0)
 
         count += 1
@@ -1441,7 +1459,7 @@ def createDefendersList():
     defendListCanvas.configure(yscrollcommand = defendListScrollbar.set)
     defendListScrollbar.configure(command = defendListCanvas.yview)
 
-    defendListMagicFrame = tk.Frame(defendListCanvas, bg="#0000C4", height=910, width=379)
+    defendListMagicFrame = tk.Frame(defendListCanvas, bg=mainColor, height=910, width=379)
     defendListMagicFrame.grid(column=0, row=0)
     defendListMagicFrame.grid_propagate(0)
 
@@ -1636,10 +1654,14 @@ def sortByInit():
     simulatedCharacters.sort(key=lambda x: x.rolledInit, reverse=True)
     createTurnList()
     
-def rerollInitiative():
-    for simchar in simulatedCharacters:
-        simchar.rolledInit = rollInitiative(simchar)
-    createTurnList()
+def rerollInitiative(character = None):
+    if(character == None):
+        for simchar in simulatedCharacters:
+            simchar.rolledInit = rollInitiative(simchar)
+        createTurnList()
+    else:
+        character.rolledInit = rollInitiative(character)
+        createTurnList()
     
 def nextTurn():
     global activeCharacter
