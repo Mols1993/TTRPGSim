@@ -1,0 +1,37 @@
+BOSS
+TEMPLATE
+image2.png
+150
+21
+15
+17, 18, 17, 20, 19, 22
+6
+cha, wis
+none
+*
+2
+fireball
+dex
+13
+3d8, 3d6
+3
+half
+*
+1
+fire bolt
+false
+int
+0
+1d10
+0
+1
+1d10
+0
+*
+3
+counter fireball
+cha
+13
+3d8, 3d6
+3
+half

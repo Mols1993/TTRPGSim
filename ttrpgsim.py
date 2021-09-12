@@ -143,7 +143,8 @@ characterFiles = os.listdir(path="characters")
 characterList = {}
 
 for i in characterFiles:
-    parseCharacter(i)
+    if(i != "TEMPLATE.txt"):
+        parseCharacter(i)
 
 #print(characterList)
 #print("---------------------------------------------------------------------")
